@@ -20,10 +20,10 @@ _IMAGE_HEIGHT = 32
 
 
 tf.app.flags.DEFINE_string(
-    'image_dir', './dataset/images/', 'Dataset root folder with images.')
+    'image_dir', './data/images/', 'Dataset root folder with images.')
 
 tf.app.flags.DEFINE_string(
-    'anno_file', './dataset/anno_file.txt', 'Path of dataset annotation file.')
+    'anno_file', './data/anno_file.txt', 'Path of dataset annotation file.')
 
 tf.app.flags.DEFINE_string(
     'data_dir', './tfrecords/', 'Directory where tfrecords are written to.')
