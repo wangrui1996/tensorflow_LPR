@@ -1,0 +1,142 @@
+WARNING: Logging before flag parsing goes to stderr.
+W0702 10:20:36.780786 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:237: The name tf.app.run is deprecated. Please use tf.compat.v1.app.run instead.
+
+W0702 10:20:36.781148 139980887852864 deprecation.py:323] From tools/train_crnn_ctc_CCPD.py:100: string_input_producer (from tensorflow.python.training.input) is deprecated and will be removed in a future version.
+Instructions for updating:
+Queue-based input pipelines have been replaced by `tf.data`. Use `tf.data.Dataset.from_tensor_slices(string_tensor).shuffle(tf.shape(input_tensor, out_type=tf.int64)[0]).repeat(num_epochs)`. If `shuffle=False`, omit the `.shuffle(...)`.
+W0702 10:20:36.784524 139980887852864 deprecation.py:323] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/python/training/input.py:278: input_producer (from tensorflow.python.training.input) is deprecated and will be removed in a future version.
+Instructions for updating:
+Queue-based input pipelines have been replaced by `tf.data`. Use `tf.data.Dataset.from_tensor_slices(input_tensor).shuffle(tf.shape(input_tensor, out_type=tf.int64)[0]).repeat(num_epochs)`. If `shuffle=False`, omit the `.shuffle(...)`.
+W0702 10:20:36.784987 139980887852864 deprecation.py:323] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/python/training/input.py:190: limit_epochs (from tensorflow.python.training.input) is deprecated and will be removed in a future version.
+Instructions for updating:
+Queue-based input pipelines have been replaced by `tf.data`. Use `tf.data.Dataset.from_tensors(tensor).repeat(num_epochs)`.
+W0702 10:20:36.785857 139980887852864 deprecation.py:323] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/python/training/input.py:199: __init__ (from tensorflow.python.training.queue_runner_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+To construct input pipelines, use the `tf.data` module.
+W0702 10:20:36.786382 139980887852864 deprecation.py:323] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/python/training/input.py:199: add_queue_runner (from tensorflow.python.training.queue_runner_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+To construct input pipelines, use the `tf.data` module.
+W0702 10:20:36.788321 139980887852864 deprecation.py:323] From tools/train_crnn_ctc_CCPD.py:101: __init__ (from tensorflow.python.ops.io_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Queue-based input pipelines have been replaced by `tf.data`. Use `tf.data.TFRecordDataset`.
+W0702 10:20:36.788935 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:103: The name tf.parse_single_example is deprecated. Please use tf.io.parse_single_example instead.
+
+W0702 10:20:36.789011 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:105: The name tf.FixedLenFeature is deprecated. Please use tf.io.FixedLenFeature instead.
+
+W0702 10:20:36.789093 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:106: The name tf.VarLenFeature is deprecated. Please use tf.io.VarLenFeature instead.
+
+W0702 10:20:36.795167 139980887852864 deprecation.py:323] From tools/train_crnn_ctc_CCPD.py:125: batch (from tensorflow.python.training.input) is deprecated and will be removed in a future version.
+Instructions for updating:
+Queue-based input pipelines have been replaced by `tf.data`. Use `tf.data.Dataset.batch(batch_size)` (or `padded_batch(...)` if `dynamic_pad=True`).
+W0702 10:20:36.804230 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:127: The name tf.placeholder is deprecated. Please use tf.compat.v1.placeholder instead.
+
+W0702 10:20:36.804672 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:128: The name tf.sparse_placeholder is deprecated. Please use tf.compat.v1.sparse_placeholder instead.
+
+W0702 10:20:37.218126 139980887852864 deprecation.py:323] From /home/rui/Disk/work/crnn_ctc_ocr.Tensorflow/crnn_model/model.py:53: __init__ (from tensorflow.python.ops.rnn_cell_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+This class is equivalent as tf.keras.layers.LSTMCell, and will be replaced by that in Tensorflow 2.0.
+W0702 10:20:37.218722 139980887852864 deprecation.py:323] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/contrib/rnn/python/ops/rnn.py:239: bidirectional_dynamic_rnn (from tensorflow.python.ops.rnn) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `keras.layers.Bidirectional(keras.layers.RNN(cell))`, which is equivalent to this API
+W0702 10:20:37.218991 139980887852864 deprecation.py:323] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/python/ops/rnn.py:464: dynamic_rnn (from tensorflow.python.ops.rnn) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `keras.layers.RNN(cell)`, which is equivalent to this API
+W0702 10:20:37.256522 139980887852864 deprecation.py:506] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/python/ops/init_ops.py:1251: calling __init__ (from tensorflow.python.ops.init_ops) with dtype is deprecated and will be removed in a future version.
+Instructions for updating:
+Call initializer instance with the dtype argument instead of passing it to the constructor
+W0702 10:20:37.261099 139980887852864 deprecation.py:506] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/python/ops/rnn_cell_impl.py:738: calling __init__ (from tensorflow.python.ops.init_ops) with dtype is deprecated and will be removed in a future version.
+Instructions for updating:
+Call initializer instance with the dtype argument instead of passing it to the constructor
+W0702 10:20:37.526341 139980887852864 deprecation.py:323] From /home/rui/tools/virtualenv/tensorflow/local/lib/python2.7/site-packages/tensorflow/python/ops/rnn.py:244: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+W0702 10:20:37.737217 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:142: The name tf.nn.ctc_loss is deprecated. Please use tf.compat.v1.nn.ctc_loss instead.
+
+W0702 10:20:37.741355 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:149: The name tf.train.create_global_step is deprecated. Please use tf.compat.v1.train.create_global_step instead.
+
+W0702 10:20:37.743383 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:151: The name tf.train.exponential_decay is deprecated. Please use tf.compat.v1.train.exponential_decay instead.
+
+W0702 10:20:37.746354 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:155: The name tf.train.AdadeltaOptimizer is deprecated. Please use tf.compat.v1.train.AdadeltaOptimizer instead.
+
+W0702 10:20:38.595361 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:160: The name tf.summary.scalar is deprecated. Please use tf.compat.v1.summary.scalar instead.
+
+W0702 10:20:38.597222 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:163: The name tf.summary.merge_all is deprecated. Please use tf.compat.v1.summary.merge_all instead.
+
+W0702 10:20:38.597737 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:166: The name tf.train.Saver is deprecated. Please use tf.compat.v1.train.Saver instead.
+
+2019-07-02 10:20:38.632348: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-07-02 10:20:38.642038: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcuda.so.1
+2019-07-02 10:20:38.928847: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:1005] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-07-02 10:20:38.930099: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55e154956d00 executing computations on platform CUDA. Devices:
+2019-07-02 10:20:38.930135: I tensorflow/compiler/xla/service/service.cc:175]   StreamExecutor device (0): TITAN Xp, Compute Capability 6.1
+2019-07-02 10:20:38.930143: I tensorflow/compiler/xla/service/service.cc:175]   StreamExecutor device (1): TITAN Xp, Compute Capability 6.1
+2019-07-02 10:20:38.951156: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 3493005000 Hz
+2019-07-02 10:20:38.952899: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55e1548ae8e0 executing computations on platform Host. Devices:
+2019-07-02 10:20:38.952949: I tensorflow/compiler/xla/service/service.cc:175]   StreamExecutor device (0): <undefined>, <undefined>
+2019-07-02 10:20:38.956127: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1640] Found device 0 with properties: 
+name: TITAN Xp major: 6 minor: 1 memoryClockRate(GHz): 1.582
+pciBusID: 0000:0b:00.0
+2019-07-02 10:20:38.956208: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:1005] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-07-02 10:20:38.957258: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1640] Found device 1 with properties: 
+name: TITAN Xp major: 6 minor: 1 memoryClockRate(GHz): 1.582
+pciBusID: 0000:42:00.0
+2019-07-02 10:20:38.964576: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcudart.so.10.0
+2019-07-02 10:20:38.965874: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcublas.so.10.0
+2019-07-02 10:20:38.966971: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcufft.so.10.0
+2019-07-02 10:20:38.967665: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcurand.so.10.0
+2019-07-02 10:20:38.969152: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcusolver.so.10.0
+2019-07-02 10:20:38.970264: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcusparse.so.10.0
+2019-07-02 10:20:38.973837: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcudnn.so.7
+2019-07-02 10:20:38.975034: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:1005] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-07-02 10:20:38.977060: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:1005] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-07-02 10:20:38.978011: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1763] Adding visible gpu devices: 0, 1
+2019-07-02 10:20:38.978056: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcudart.so.10.0
+2019-07-02 10:20:38.980380: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1181] Device interconnect StreamExecutor with strength 1 edge matrix:
+2019-07-02 10:20:38.980391: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1187]      0 1 
+2019-07-02 10:20:38.980396: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1200] 0:   N Y 
+2019-07-02 10:20:38.980398: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1200] 1:   Y N 
+2019-07-02 10:20:38.981530: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:1005] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-07-02 10:20:38.983031: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1326] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 11427 MB memory) -> physical GPU (device: 0, name: TITAN Xp, pci bus id: 0000:0b:00.0, compute capability: 6.1)
+2019-07-02 10:20:38.983379: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:1005] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-07-02 10:20:38.984572: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1326] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:1 with 11424 MB memory) -> physical GPU (device: 1, name: TITAN Xp, pci bus id: 0000:42:00.0, compute capability: 6.1)
+W0702 10:20:38.986300 139980887852864 deprecation_wrapper.py:119] From tools/train_crnn_ctc_CCPD.py:176: The name tf.summary.FileWriter is deprecated. Please use tf.compat.v1.summary.FileWriter instead.
+
+W0702 10:20:39.676462 139980887852864 deprecation.py:323] From tools/train_crnn_ctc_CCPD.py:183: start_queue_runners (from tensorflow.python.training.queue_runner_impl) is deprecated and will be removed in a future version.
+Instructions for updating:
+To construct input pipelines, use the `tf.data` module.
+2019-07-02 10:20:39.874181: W tensorflow/compiler/jit/mark_for_compilation_pass.cc:1412] (One-time warning): Not using XLA:CPU for cluster because envvar TF_XLA_FLAGS=--tf_xla_cpu_global_jit was not set.  If you want XLA:CPU, either set that envvar, or use experimental_jit_scope to enable XLA:CPU.  To confirm that XLA is active, pass --vmodule=xla_compilation_cache=1 (as a proper command-line flag, not via TF_XLA_FLAGS) or set the envvar XLA_FLAGS=--xla_hlo_profile.
+2019-07-02 10:20:40.520033: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcublas.so.10.0
+2019-07-02 10:20:40.690490: I tensorflow/stream_executor/platform/default/dso_loader.cc:42] Successfully opened dynamic library libcudnn.so.7
+2019-07-02 10:20:45.553159: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:20:48.926532: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:20:51.816204: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:20:54.192893: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:20:55.408687: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:20:56.526197: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:20:56.526335: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:20:57.683319: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:20:57.683448: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:03.399132: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:04.379342: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:07.044308: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:10.444094: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:12.151956: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:13.958080: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:14.980909: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:15.827831: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:15.828018: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:16.675823: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:17.663952: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:19.045241: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:19.045407: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:20.176065: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:22.979019: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:23.868224: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:24.743402: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:25.662592: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:27.427043: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:34.956014: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:34.956104: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:36.724246: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:39.822580: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
+2019-07-02 10:21:42.505355: W tensorflow/core/util/ctc/ctc_loss_calculator.cc:145] No valid path found.
