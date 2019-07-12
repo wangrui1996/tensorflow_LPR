@@ -26,7 +26,7 @@ tf.app.flags.DEFINE_string(
     'anno_file', './data/anno_file.txt', 'Path of dataset annotation file.')
 
 tf.app.flags.DEFINE_string(
-    'data_dir', './tfrecords/', 'Directory where tfrecords are written to.')
+    'data_dir', './data/', 'Directory where tfrecords are written to.')
 
 tf.app.flags.DEFINE_float(
     'validation_split_fraction', 0.1, 'Fraction of training data to use for validation.')
@@ -35,7 +35,7 @@ tf.app.flags.DEFINE_boolean(
     'shuffle_list', True, 'Whether shuffle data in annotation file list.')
 
 tf.app.flags.DEFINE_string(
-    'char_map_json_file', './char_map/char_map_CCPD.json', 'Path to char map json file') 
+    'char_map_json_file', './char_map/plate_map.json', 'Path to char map json file')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -71,7 +71,9 @@ def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None):
             label = line.split()[1].lower()
 
             image = cv2.imread(image_path)
-            if image is None: 
+            if image is None:
+                print("Can not read image of : '{}'".format(image_path))
+                exit(0)
                 continue # skip bad image.
 
             h, w, c = image.shape
@@ -83,8 +85,7 @@ def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None):
                 continue
 
             # convert string object to bytes in py3
-            image_name = image_name if sys.version_info[0] < 3 else image_name.encode('utf-8') 
-            
+            image_name = image_name if sys.version_info[0] < 3 else image_name.encode('utf-8')
             features = tf.train.Features(feature={
                'labels': _int64_feature(_string_to_int(label, char_map_dict)),
                'images': _bytes_feature(image_buffer.tostring()),

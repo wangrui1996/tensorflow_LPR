@@ -2,18 +2,36 @@ import os
 import cv2
 from concurrent.futures import ThreadPoolExecutor
 import multiprocessing
+import json
 
 thread_num = 100
-image_list_path = "./data/image_list.txt"
+image_list_path = "./data/anno_file.txt"
 dataset_path = "./data/CCPD2019/ccpd_base"
-data_save_path = "./data/plate_images"
+data_save_path = "./data/images"
 
-label_map = ["A","B","C","D","E","F"  \
-        "G","H","I","J","K","L","M","N","O","P", \
-        "Q","R","S","T","U","V","W","X","Y","Z", \
-        "0","1","2","3","4","5","6","7","8","9"]
+
+
+char_label_map_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "char_map/char_map_CCPD.json")
+with open(char_label_map_path, "r") as f:
+    char_label_map = json.load(f)
+
+province_label_map_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "char_map/province_map_CCPD.json")
+with open(province_label_map_path, "r") as f:
+    province_label_map = json.load(f)
+
+plate_label_map_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "char_map/plate_map.json")
+
+
+
+
+def find_key_by_value(label_map, value):
+    for label in label_map:
+        if label_map[str(label)] == value:
+            return label
 
 img_txt_file = open(image_list_path, "w+")
+
+plate_list = []
 
 index = 1
 lock = multiprocessing.Lock()
@@ -49,13 +67,17 @@ for r, d, f in os.walk(dataset_path):
             #print(x1, y1, x2, y2)
             img_label = img_path.split("-")[4]
             img_label_list = [int(i) for i in img_label.split("_")]
-            #print(img_label_list)
-            #exit(0)
             img_label = ""
             for i in img_label_list:
-                img_label = img_label + label_map[i] 
-            img_label = img_label[1:] 
-            img_txt_file.writelines("{} {}\n".format(save_img_path, img_label.lower()))
-            #exit(0)
+                img_label = img_label + find_key_by_value(char_label_map, i)
+            img_label = "{}{}".format(find_key_by_value(province_label_map, img_label_list[0]), img_label[1:])
+            img_txt_file.writelines("{} {}\n".format(os.path.basename(save_img_path), img_label.lower()))
 executor.shutdown(wait=True)
+for key in province_label_map:
+    province_label_map[key] = province_label_map[key] + len(char_label_map)
+
+
+with open(plate_label_map_path, "w+") as f:
+    json.dump({**char_label_map ,**province_label_map}, f)
+
 print("\n")
