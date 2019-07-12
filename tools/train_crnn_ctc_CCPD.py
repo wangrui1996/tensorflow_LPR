@@ -12,7 +12,7 @@ import numpy as np
 
 from crnn_model import model
 
-os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_string(
@@ -56,7 +56,7 @@ tf.app.flags.DEFINE_integer(
 # ------------------------------------Char dictionary------------------------------------
 
 tf.app.flags.DEFINE_string(
-    'char_map_json_file', './char_map/char_map_CCPD.json', 'Path to char map json file')
+    'char_map_json_file', './char_map/plate_map.json', 'Path to char map json file')
 
 FLAGS = tf.app.flags.FLAGS
 

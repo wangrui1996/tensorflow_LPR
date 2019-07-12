@@ -63,12 +63,6 @@ for r, d, f in os.walk(dataset_path):
 
 
             executor.submit(progress, img_path, save_img_path, x1,y1,x2,y2)
-            #progress(img_path, save_img_path, x1,y1,x2,y2)
-            #img = cv2.imread(img_path)
-            #img = img[y1:y2, x1:x2,:]
-            #cv2.imwrite(save_img_path, img)
-            #print(roi_str)
-            #print(x1, y1, x2, y2)
             img_label = img_path.split("-")[4]
             img_label_list = [int(i) for i in img_label.split("_")]
             img_label = ""
