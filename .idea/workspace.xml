@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af1cd62c-ad3a-4179-ae09-dea55b67ae02" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/crnnLicensePlateRecognition.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/crnnLicensePlateRecognition.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/char_map/char_map.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/char_map/char_map_CCPD.json" beforeDir="false" afterPath="$PROJECT_DIR$/char_map/char_map_CCPD.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tools/create_image_list_CCPD.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/create_image_list_CCPD.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -49,11 +45,11 @@
           <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tools/create_image_list_CCPD.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="292">
-              <caret line="73" column="84" selection-start-line="73" selection-start-column="84" selection-end-line="73" selection-end-column="84" />
+            <state relative-caret-position="135">
+              <caret line="52" column="22" selection-start-line="52" selection-start-column="22" selection-end-line="52" selection-end-column="22" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -63,18 +59,14 @@
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/data/anno_file.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="90" selection-start-line="9" selection-start-column="90" selection-end-line="9" selection-end-column="90" />
-            </state>
-          </provider>
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="25">
-              <caret line="71" selection-start-line="71" selection-end-line="71" />
+            <state relative-caret-position="112">
+              <caret line="102" column="65" selection-start-line="102" selection-start-column="65" selection-end-line="102" selection-end-column="65" />
               <folding>
                 <element signature="e#64#102#0" expanded="true" />
               </folding>
@@ -84,17 +76,6 @@
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tools/eval_crnn_ctc.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#38#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tools/inference_crnn_ctc.py">
           <provider selected="true" editor-type-id="text-editor">
             <state>
               <folding>
@@ -129,8 +110,8 @@
         <option value="$PROJECT_DIR$/char_map/province_map_CCPD.json" />
         <option value="$PROJECT_DIR$/char_map/char_map_CCPD.json" />
         <option value="$PROJECT_DIR$/data/anno_file.txt" />
-        <option value="$PROJECT_DIR$/tools/create_image_list_CCPD.py" />
         <option value="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" />
+        <option value="$PROJECT_DIR$/tools/create_image_list_CCPD.py" />
       </list>
     </option>
   </component>
@@ -161,17 +142,6 @@
               <item name="crnnLicensePlateRecognition" type="b2602c69:ProjectViewProjectNode" />
               <item name="crnnLicensePlateRecognition" type="462c0819:PsiDirectoryNode" />
               <item name="crnn_model" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="crnnLicensePlateRecognition" type="b2602c69:ProjectViewProjectNode" />
-              <item name="crnnLicensePlateRecognition" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="crnnLicensePlateRecognition" type="b2602c69:ProjectViewProjectNode" />
-              <item name="crnnLicensePlateRecognition" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="images" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="crnnLicensePlateRecognition" type="b2602c69:ProjectViewProjectNode" />
@@ -282,23 +252,24 @@
       <workItem from="1562833132486" duration="347000" />
       <workItem from="1562836504142" duration="2635000" />
       <workItem from="1562839306262" duration="5178000" />
-      <workItem from="1562892002149" duration="5351000" />
+      <workItem from="1562892002149" duration="6682000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="13511000" />
+    <option name="totallyTimeSpent" value="14842000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1747" y="90" width="1024" height="555" extended-state="0" />
+    <frame x="1366" y="25" width="1366" height="743" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.35276073" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26136363" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.26384366" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.6314554" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39250815" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -306,7 +277,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.37296417" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.37296417" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -323,25 +294,15 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py</url>
-          <line>87</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py</url>
-          <line>86</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py</url>
-          <line>68</line>
-          <option name="timeStamp" value="3" />
+          <line>52</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/crnnLicensePlateRecognition$create_image_list_CCPD.coverage" NAME="create_image_list_CCPD Coverage Results" MODIFIED="1562895451351" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tools" />
-    <SUITE FILE_PATH="coverage/crnnLicensePlateRecognition$create_crnn_ctc_tfrecord_CCPD.coverage" NAME="create_crnn_ctc_tfrecord_CCPD Coverage Results" MODIFIED="1562897345245" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
+    <SUITE FILE_PATH="coverage/crnnLicensePlateRecognition$create_crnn_ctc_tfrecord_CCPD.coverage" NAME="create_crnn_ctc_tfrecord_CCPD Coverage Results" MODIFIED="1562897707233" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/requirements.txt">
@@ -427,15 +388,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tools/create_image_list_CCPD.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="292">
-          <caret line="73" column="84" selection-start-line="73" selection-start-column="84" selection-end-line="73" selection-end-column="84" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/data/images/0031-0_1-332&amp;469_421&amp;499-421&amp;499_333&amp;499_332&amp;469_420&amp;469-0_0_2_30_25_29_7-94-25.jpg">
+      <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/data/anno_file.txt">
       <provider editor-type-id="LargeFileEditor">
@@ -443,18 +397,31 @@
           <caret line="7" column="107" selection-start-line="7" selection-start-column="107" selection-end-line="7" selection-end-column="107" />
         </state>
       </provider>
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$USER_HOME$/tools/virtualenv/tensorflow/lib/python3.6/site-packages/absl/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="90" selection-start-line="9" selection-start-column="90" selection-end-line="9" selection-end-column="90" />
+        <state relative-caret-position="107">
+          <caret line="309" selection-start-line="309" selection-end-line="309" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="25">
-          <caret line="71" selection-start-line="71" selection-end-line="71" />
+        <state relative-caret-position="112">
+          <caret line="102" column="65" selection-start-line="102" selection-start-column="65" selection-end-line="102" selection-end-column="65" />
           <folding>
             <element signature="e#64#102#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/create_image_list_CCPD.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="52" column="22" selection-start-line="52" selection-start-column="22" selection-end-line="52" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -48,7 +48,11 @@ for r, d, f in os.walk(dataset_path):
             x2=int(roi_str.split('_')[1].split('&')[0])
             y2=int(roi_str.split('_')[1].split('&')[1])
             def progress(image_path, save_image_path, x1, y1, x2, y2):
-                img = cv2.imread(image_path)
+                try:
+                    img = cv2.imread(image_path)
+                except:
+                    print("can not read '{}'".format(image_path))
+
                 img = img[y1:y2, x1:x2, :]
                 cv2.imwrite(save_image_path, img)
                 with lock:
