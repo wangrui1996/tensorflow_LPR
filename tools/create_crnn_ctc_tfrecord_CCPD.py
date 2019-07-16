@@ -17,6 +17,7 @@ import cv2
 import numpy as np
 
 _IMAGE_HEIGHT = 32
+_IMAGE_WIDTH = 80
 
 
 tf.app.flags.DEFINE_string(
@@ -76,9 +77,8 @@ def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None):
                 exit(0)
                 continue # skip bad image.
 
-            h, w, c = image.shape
             height = _IMAGE_HEIGHT
-            width = int(w * height / h)
+            width = _IMAGE_WIDTH
             image = cv2.resize(image, (width, height))
             is_success, image_buffer = cv2.imencode('.jpg', image)
             if not is_success:

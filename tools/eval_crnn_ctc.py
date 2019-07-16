@@ -12,14 +12,14 @@ import numpy as np
 
 from crnn_model import model
 
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_string(
     'data_dir', './tfrecords/', 'Path to the directory containing data tf record.')
 
 tf.app.flags.DEFINE_string(
-    'model_dir', './model/', 'Base directory for the model.')
+    'model_dir', './models/', 'Base directory for the model.')
 
 tf.app.flags.DEFINE_integer(
     'num_threads', 4, 'The number of threads to use in batch shuffling') 
@@ -37,7 +37,7 @@ tf.app.flags.DEFINE_integer(
 # ------------------------------------Char dictionary------------------------------------
 
 tf.app.flags.DEFINE_string(
-    'char_map_json_file', './char_map/char_map.json', 'Path to char map json file')
+    'char_map_json_file', './char_map/plate_map.json', 'Path to char map json file')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -170,7 +170,8 @@ def _eval_crnn_ctc():
                             accuracy.append(0)
 
             for index, img in enumerate(imgs):
-                print('Predict {:s} image with gt label: {:s} <--> predict label: {:s}'.format(names[index], lbls[index], preds[index]))
+
+                print('Predict {:s} image with gt label: {:s} <--> predict label: {:s}'.format(str(names[index]), str(lbls[index]), str(preds[index])))
         
         accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
         print('Mean test accuracy is {:5f}'.format(accuracy))

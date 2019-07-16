@@ -7,5 +7,7 @@ tfrecords/*
 
 *.pyc
 
+*.jpg
 
+t
 *.log
