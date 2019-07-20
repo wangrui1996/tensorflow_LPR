@@ -17,8 +17,8 @@ import cv2
 import numpy as np
 
 _IMAGE_HEIGHT = 32
-_IMAGE_WIDTH = 80
-
+_IMAGE_WIDTH = 128
+_CROP_SIZE = 5
 
 tf.app.flags.DEFINE_string(
     'image_dir', './data/images/', 'Dataset root folder with images.')
@@ -77,8 +77,8 @@ def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None):
                 exit(0)
                 continue # skip bad image.
 
-            height = _IMAGE_HEIGHT
-            width = _IMAGE_WIDTH
+            height = _IMAGE_HEIGHT + _CROP_SIZE
+            width = _IMAGE_WIDTH + _CROP_SIZE
             image = cv2.resize(image, (width, height))
             is_success, image_buffer = cv2.imencode('.jpg', image)
             if not is_success:

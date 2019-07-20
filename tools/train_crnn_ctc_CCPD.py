@@ -53,6 +53,11 @@ tf.app.flags.DEFINE_integer(
 tf.app.flags.DEFINE_integer(
     'lstm_hidden_uints', 256, 'The number of units in each LSTM cell')
 
+tf.app.flags.DEFINE_integer(
+    'crop_height', 32, 'The height of crop size in image')
+tf.app.flags.DEFINE_integer(
+    'crop_width', 128, 'The width of crop size in image')
+
 # ------------------------------------Char dictionary------------------------------------
 
 tf.app.flags.DEFINE_string(
@@ -106,11 +111,17 @@ def _read_tfrecord(tfrecord_path, num_epochs=None):
                                            'labels': tf.VarLenFeature(tf.int64),
                                            'imagenames': tf.FixedLenFeature([], tf.string),
                                        })
+    max_delta = 50
+    contrast_lower = 0.5
+    contrast_upper = 1.5
     images = tf.image.decode_jpeg(features['images'])
-    images.set_shape([32, None, 3])
+    tf.image.random_contrast(images, contrast_lower, contrast_upper, seed=None)
+    images = tf.image.random_brightness(images, max_delta, seed=None)
+    images = tf.image.resize_with_crop_or_pad(images,FLAGS.crop_height,FLAGS.crop_width)
+    images.set_shape([FLAGS.crop_height, FLAGS.crop_width, 3])
     images = tf.cast(images, tf.float32)
     labels = tf.cast(features['labels'], tf.int32)
-    sequence_length = tf.cast(tf.shape(images)[-2] / 4, tf.int32)
+    sequence_length = tf.cast(tf.shape(images)[-2] / 8, tf.int32)
     imagenames = features['imagenames']
     return images, labels, sequence_length, imagenames
     
