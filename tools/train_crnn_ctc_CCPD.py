@@ -13,6 +13,8 @@ from tools.eval_crnn_ctc import _eval_crnn_ctc
 from crnn_model import model
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
+_IMAGE_HEIGHT = 32
+_IMAGE_WIDTH = 128
 
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_string(
@@ -101,9 +103,9 @@ def _int_to_string(value, char_map_dict=None):
             return "" 
     raise ValueError('char map dict not has {:d} value. convert index to char failed.'.format(value))
 
-def _read_tfrecord(tfrecord_path, num_epochs=None):
+def _read_train_tfrecord(tfrecord_path, num_epochs=None):
     if not os.path.exists(tfrecord_path):
-        raise ValueError('cannott find tfrecord file in path: {:s}'.format(tfrecord_path))
+        raise ValueError('cannot find tfrecord file in path: {:s}'.format(tfrecord_path))
 
     filename_queue = tf.train.string_input_producer([tfrecord_path], num_epochs=num_epochs)
     reader = tf.TFRecordReader()
@@ -127,18 +129,51 @@ def _read_tfrecord(tfrecord_path, num_epochs=None):
     sequence_length = tf.cast(tf.shape(images)[-2] / 8, tf.int32)
     imagenames = features['imagenames']
     return images, labels, sequence_length, imagenames
-    
+
+def _read_test_tfrecord(tfrecord_path, num_epochs=None):
+    if not os.path.exists(tfrecord_path):
+        raise ValueError('cannot find tfrecord file in path: {:s}'.format(tfrecord_path))
+
+    filename_queue = tf.train.string_input_producer([tfrecord_path], num_epochs=num_epochs)
+    reader = tf.TFRecordReader()
+    _, serialized_example = reader.read(filename_queue)
+    features = tf.parse_single_example(serialized_example,
+                                       features={
+                                           'images': tf.FixedLenFeature([], tf.string),
+                                           'labels': tf.VarLenFeature(tf.int64),
+                                           'imagenames': tf.FixedLenFeature([], tf.string),
+                                       })
+    images = tf.image.decode_jpeg(features['images'])
+    images.set_shape([_IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
+    images = tf.cast(images, tf.float32)
+    labels = tf.cast(features['labels'], tf.int32)
+    sequence_length = tf.cast(tf.shape(images)[-2] / 8, tf.int32)
+    imagenames = features['imagenames']
+    return images, labels, sequence_length, imagenames
+
 
 def _train_crnn_ctc():
-    tfrecord_path = os.path.join(FLAGS.data_dir, 'train.tfrecord')
-    images, labels, sequence_lengths, _ = _read_tfrecord(tfrecord_path=tfrecord_path)
+    train_tfrecord_path = os.path.join(FLAGS.data_dir, 'train.tfrecord')
+    train_images, train_labels, train_sequence_lengths, _ = _read_train_tfrecord(tfrecord_path=train_tfrecord_path)
+    test_tfrecord_path = os.path.join(FLAGS.data_dir, 'validation.tfrecord')
+    test_images, test_labels, test_sequence_lengths, test_imagenames = _read_test_tfrecord(tfrecord_path=test_tfrecord_path)
+
+    # get the test iter size
+    test_sample_count = 0
+    for record in tf.python_io.tf_record_iterator(test_tfrecord_path):
+        test_sample_count += 1
+    step_nums = test_sample_count // FLAGS.batch_size
 
     # decode the training data from tfrecords
-    batch_images, batch_labels, batch_sequence_lengths = tf.train.batch(
-        tensors=[images, labels, sequence_lengths], batch_size=FLAGS.batch_size, dynamic_pad=True,
+    train_batch_images, train_batch_labels, train_batch_sequence_lengths = tf.train.batch(
+        tensors=[train_images, train_labels, train_sequence_lengths], batch_size=FLAGS.batch_size, dynamic_pad=True,
+        capacity=1000 + 2*FLAGS.batch_size, num_threads=FLAGS.num_threads)
+    # decode the testing data from tfrecords
+    test_batch_images, test_batch_labels, test_batch_sequence_lengths, test_batch_imagenames = tf.train.batch(
+        tensors=[test_images, test_labels, test_sequence_lengths, test_imagenames], batch_size=FLAGS.batch_size, dynamic_pad=True,
         capacity=1000 + 2*FLAGS.batch_size, num_threads=FLAGS.num_threads)
 
-    input_images = tf.placeholder(tf.float32, shape=[FLAGS.batch_size, 32, None, 3], name='input_images')
+    input_images = tf.placeholder(tf.float32, shape=[FLAGS.batch_size, _IMAGE_HEIGHT, _IMAGE_WIDTH, 3], name='input_images')
     input_labels = tf.sparse_placeholder(tf.int32, name='input_labels')
     input_sequence_lengths = tf.placeholder(dtype=tf.int32, shape=[FLAGS.batch_size], name='input_sequence_lengths')
 
@@ -198,9 +233,39 @@ def _train_crnn_ctc():
 
         for step in range(FLAGS.max_train_steps):
             if (step + 1) % FLAGS.step_per_test == 0 or step == 0:
-                _eval_crnn_ctc()
+                accuracy = []
+                for _ in range(step_nums):
+                    imgs, lbls, seq_lens, names = sess.run([test_batch_images, test_batch_labels, test_batch_sequence_lengths, test_batch_imagenames])
+                    preds = sess.run(ctc_decoded, feed_dict={input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens})
+                    preds = _sparse_matrix_to_list(preds[0], char_map_dict)
+                    lbls = _sparse_matrix_to_list(lbls, char_map_dict)
+                    #print(preds)
+                    # #print(lbls)
+                    for index, lbl in enumerate(lbls):
+                        pred = preds[index]
+                        total_count = len(lbl)
+                        correct_count = 0
+                        try:
+                            for i, tmp in enumerate(lbl):
+                                if tmp == pred[i]:
+                                    correct_count += 1
+                        except IndexError:
+                            continue
+                        finally:
+                            try:
+                                accuracy.append(correct_count / total_count)
+                            except ZeroDivisionError:
+                                if len(pred) == 0:
+                                    accuracy.append(1)
+                                else:
+                                    accuracy.append(0)
+                    for index, img in enumerate(imgs):
+                        print('Predict {:s} image with gt label: {:s} <--> predict label: {:s}'.format(str(names[index]), str(lbls[index]), str(preds[index])), flush=True)
+                        accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
+                        print('Mean test accuracy is {:5f}'.format(accuracy), flush=True)
 
-            imgs, lbls, seq_lens = sess.run([batch_images, batch_labels, batch_sequence_lengths])
+
+            imgs, lbls, seq_lens = sess.run([train_batch_images, train_batch_labels, train_batch_sequence_lengths])
 
             _, cl, lr, sd, preds, summary = sess.run(
                 [optimizer, ctc_loss, learning_rate, sequence_distance, ctc_decoded, merge_summary_op],
