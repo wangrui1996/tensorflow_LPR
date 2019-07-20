@@ -13,7 +13,8 @@ import numpy as np
 from crnn_model import model
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-
+_IMAGE_HEIGHT = 32
+_IMAGE_WIDTH = 128
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_string(
     'data_dir', './tfrecords/', 'Path to the directory containing data tf record.')
@@ -88,10 +89,10 @@ def _read_tfrecord(tfrecord_path, num_epochs=None):
                                            'imagenames': tf.FixedLenFeature([], tf.string),
                                        })
     images = tf.image.decode_jpeg(features['images'])
-    images.set_shape([32, None, 3])
+    images.set_shape([_IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
     images = tf.cast(images, tf.float32)
     labels = tf.cast(features['labels'], tf.int32)
-    sequence_length = tf.cast(tf.shape(images)[-2] / 4, tf.int32)
+    sequence_length = tf.cast(tf.shape(images)[-2] / 8, tf.int32)
     imagenames = features['imagenames']
     return images, labels, sequence_length, imagenames
 
@@ -104,7 +105,7 @@ def _eval_crnn_ctc():
         tensors=[images, labels, sequence_lengths, imagenames], batch_size=FLAGS.batch_size, dynamic_pad=True,
         capacity=1000 + 2*FLAGS.batch_size, num_threads=FLAGS.num_threads)
 
-    input_images = tf.placeholder(tf.float32, shape=[FLAGS.batch_size, 32, None, 3], name='input_images')
+    input_images = tf.placeholder(tf.float32, shape=[FLAGS.batch_size, _IMAGE_HEIGHT, _IMAGE_WIDTH, 3], name='input_images')
     input_labels = tf.sparse_placeholder(tf.int32, name='input_labels')
     input_sequence_lengths = tf.placeholder(dtype=tf.int32, shape=[FLAGS.batch_size], name='input_sequence_lengths')
 

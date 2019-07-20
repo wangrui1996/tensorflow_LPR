@@ -16,6 +16,7 @@ from crnn_model import model
 os.environ["CUDA_VISIBLE_DEVICES"]=""
 
 _IMAGE_HEIGHT = 32
+_IMAGE_WIDTH = 128
 
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_string(
@@ -74,7 +75,7 @@ def _int_to_string(value, char_map_dict=None):
     raise ValueError('char map dict not has {:d} value. convert index to char failed.'.format(value))
 
 def _inference_crnn_ctc():
-    input_image = tf.placeholder(dtype=tf.float32, shape=[1, _IMAGE_HEIGHT, None, 3])
+    input_image = tf.placeholder(dtype=tf.float32, shape=[1, _IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
     char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
     # initialise the net model
     crnn_net = model.CRNNCTCNetwork(phase='test',
@@ -87,7 +88,7 @@ def _inference_crnn_ctc():
 
     input_sequence_length = tf.placeholder(tf.int32, shape=[1], name='input_sequence_length')
 
-    ctc_decoded, ct_log_prob = tf.nn.ctc_beam_search_decoder(net_out, input_sequence_length, merge_repeated=True)
+    ctc_decoded, ct_log_prob = tf.nn.ctc_beam_search_decoder(net_out, input_sequence_length, merge_repeated=False)
 
     with open(FLAGS.image_list, 'r') as fd:
        image_names = [line.strip() for line in fd.readlines()]
@@ -109,7 +110,7 @@ def _inference_crnn_ctc():
             image = cv2.resize(image, (width, height))
             image = np.expand_dims(image, axis=0)
             image = np.array(image, dtype=np.float32)
-            seq_len = np.array([width / 4], dtype=np.int32)
+            seq_len = np.array([width / 8], dtype=np.int32)
 
             preds = sess.run(ctc_decoded, feed_dict={input_image:image, input_sequence_length:seq_len})
  

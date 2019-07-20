@@ -9,7 +9,7 @@ import json
 import tensorflow as tf
 
 import numpy as np
-
+from tools.eval_crnn_ctc import _eval_crnn_ctc
 from crnn_model import model
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -26,6 +26,9 @@ tf.app.flags.DEFINE_integer(
 
 tf.app.flags.DEFINE_integer(
     'step_per_eval', 100, 'The number of training steps to run between evaluations.')
+
+tf.app.flags.DEFINE_integer(
+    'step_per_test', 1000, 'The number of training steps to run between evaluations.')
 
 tf.app.flags.DEFINE_integer(
     'step_per_save', 1000, 'The number of training steps to run between save checkpoints.')
@@ -194,6 +197,9 @@ def _train_crnn_ctc():
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
 
         for step in range(FLAGS.max_train_steps):
+            if (step + 1) % FLAGS.step_per_test == 0 or step == 0:
+                _eval_crnn_ctc()
+
             imgs, lbls, seq_lens = sess.run([batch_images, batch_labels, batch_sequence_lengths])
 
             _, cl, lr, sd, preds, summary = sess.run(
@@ -232,7 +238,8 @@ def _train_crnn_ctc():
                 accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
 
                 print('step:{:d} learning_rate={:9f} ctc_loss={:9f} sequence_distance={:9f} train_accuracy={:9f}'.format(
-                    step + 1, lr, cl, sd, accuracy))
+                    step + 1, lr, cl, sd, accuracy),  flush=True)
+
             
         # close tensorboard writer
         summary_writer.close()
