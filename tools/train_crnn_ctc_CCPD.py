@@ -57,11 +57,6 @@ tf.app.flags.DEFINE_integer(
 tf.app.flags.DEFINE_integer(
     'lstm_hidden_uints', 256, 'The number of units in each LSTM cell')
 
-tf.app.flags.DEFINE_integer(
-    'crop_height', 32, 'The height of crop size in image')
-tf.app.flags.DEFINE_integer(
-    'crop_width', 128, 'The width of crop size in image')
-
 # ------------------------------------Char dictionary------------------------------------
 
 tf.app.flags.DEFINE_string(
@@ -121,7 +116,7 @@ def _read_train_tfrecord(tfrecord_path, num_epochs=None):
     images = tf.image.decode_jpeg(features['images'])
     tf.image.random_contrast(images, contrast_lower, contrast_upper, seed=None)
     images = tf.image.random_brightness(images, max_delta, seed=None)
-    images = tf.image.resize_with_crop_or_pad(images,FLAGS.crop_height,FLAGS.crop_width)
+    images = tf.image.resize_with_crop_or_pad(images,_IMAGE_HEIGHT,_IMAGE_WIDTH)
     images.set_shape([FLAGS.crop_height, FLAGS.crop_width, 3])
     images = tf.cast(images, tf.float32)
     labels = tf.cast(features['labels'], tf.int32)
