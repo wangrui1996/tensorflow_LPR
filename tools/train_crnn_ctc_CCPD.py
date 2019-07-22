@@ -12,7 +12,7 @@ import numpy as np
 from crnn_model import model
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-_IMAGE_HEIGHT = 32
+_IMAGE_HEIGHT = 64
 _IMAGE_WIDTH = 128
 
 # ------------------------------------Basic prameters------------------------------------
@@ -143,7 +143,7 @@ def _read_test_tfrecord(tfrecord_path, num_epochs=None):
                                            'imagenames': tf.FixedLenFeature([], tf.string),
                                        })
     images = tf.image.decode_jpeg(features['images'])
-    images = tf.image.resize_images(images,FLAGS.crop_height,FLAGS.crop_width)
+    images = tf.image.resize_images(images,(FLAGS.crop_height,FLAGS.crop_width))
     images.set_shape([_IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
     images = tf.cast(images, tf.float32)
     labels = tf.cast(features['labels'], tf.int32)
@@ -259,10 +259,10 @@ def _train_crnn_ctc():
                                     accuracy.append(1)
                                 else:
                                     accuracy.append(0)
-                    for index, img in enumerate(imgs):
-                        print('Predict {:s} image with gt label: {:s} <--> predict label: {:s}'.format(str(names[index]), str(lbls[index]), str(preds[index])), flush=True)
-                        accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
-                        print('Mean test accuracy is {:5f}'.format(accuracy), flush=True)
+       #             for index, img in enumerate(imgs):
+       #                 print('Predict {:s} image with gt label: {:s} <--> predict label: {:s}'.format(str(names[index]), str(lbls[index]), str(preds[index])), flush=True)
+                accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
+                print('Mean test accuracy is {:5f}'.format(accuracy), flush=True)
 
 
             imgs, lbls, seq_lens = sess.run([train_batch_images, train_batch_labels, train_batch_sequence_lengths])

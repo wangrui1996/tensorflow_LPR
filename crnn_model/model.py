@@ -28,17 +28,24 @@ class CRNNCTCNetwork(object):
                             weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                             weights_regularizer=slim.l2_regularizer(0.0005),
                             biases_initializer=None):
-            net = slim.repeat(input_tensor, 2, slim.conv2d, 64, kernel_size=3, stride=1, scope='conv1')
+            # 64 x 128
+            net = slim.repeat(input_tensor, 2, slim.conv2d, 32, kernel_size=3, stride=1, scope='conv1')
             net = slim.max_pool2d(net, kernel_size=2, stride=2, scope='pool1')
-            net = slim.repeat(net, 2, slim.conv2d, 128, kernel_size=3, stride=1, scope='conv2')
+            # 32 x 64
+            net = slim.repeat(net, 2, slim.conv2d, 64, kernel_size=3, stride=1, scope='conv2')
             net = slim.max_pool2d(net, kernel_size=2, stride=2, scope='pool2')
-            net = slim.repeat(net, 2, slim.conv2d, 256, kernel_size=3, stride=1, scope='conv3')
-            net = slim.max_pool2d(net, kernel_size=2, stride=2, scope='pool3')
-            net = slim.conv2d(net, 512, kernel_size=3, stride=1, scope='conv4')
+            # 16 x 32
+            net = slim.repeat(net, 2, slim.conv2d, 128, kernel_size=3, stride=1, scope='conv3')
+            net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool3')
+            # 8 x 32
+            net = slim.conv2d(net, 256, kernel_size=3, stride=1, scope='conv4')
             net = slim.batch_norm(net, decay=_BATCH_DECAY, is_training=is_training, scope='bn4')
-            net = slim.conv2d(net, 512, kernel_size=3, stride=1, scope='conv5')
+            net = slim.conv2d(net, 256, kernel_size=3, stride=1, scope='conv5')
             net = slim.batch_norm(net, decay=_BATCH_DECAY, is_training=is_training, scope='bn5')
             net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool5')
+            # 4 x 32
+            net = slim.conv2d(net, 256, padding="VALID", kernel_size=2, stride=2, scope='conv6')
+            # 2 x 32
             net = slim.conv2d(net, 512, padding="VALID", kernel_size=[2, 1], stride=1, scope='conv6')
         return net
     

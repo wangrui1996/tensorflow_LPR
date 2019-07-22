@@ -16,7 +16,7 @@ import tensorflow as tf
 import cv2
 import numpy as np
 
-_IMAGE_HEIGHT = 32
+_IMAGE_HEIGHT = 64
 _IMAGE_WIDTH = 128
 _CROP_SIZE = 5
 

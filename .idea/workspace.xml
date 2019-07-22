@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="af1cd62c-ad3a-4179-ae09-dea55b67ae02" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crnn_model/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/crnn_model/model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,6 +15,48 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tools/run_train.sh">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" selection-start-line="1" selection-end-line="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="165">
+              <caret line="11" column="1" selection-start-line="11" selection-start-column="1" selection-end-line="11" selection-end-column="1" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tools/create_image_list_CCPD.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="310">
+              <caret line="21" column="15" lean-forward="true" selection-start-line="21" selection-start-column="15" selection-end-line="21" selection-end-column="15" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/crnn_model/model.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="130">
+              <caret line="56" column="36" lean-forward="true" selection-start-line="56" selection-start-column="36" selection-end-line="56" selection-end-column="36" />
+              <folding>
+                <element signature="e#210#248#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tools/create_xml_ssd_CCPD.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -27,49 +70,10 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tools/run_create_crnn_tfrecord.sh">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="7" selection-start-column="7" selection-end-column="7" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/lib/python3.6/concurrent/futures/thread.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="735">
-              <caret line="55" selection-start-line="55" selection-end-line="55" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/lib/python3.6/xml/etree/ElementTree.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="25" column="61" selection-start-line="25" selection-start-column="61" selection-end-line="25" selection-end-column="61" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/tools/create_image_list_CCPD.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="9" column="31" selection-start-line="9" selection-start-column="31" selection-end-line="9" selection-end-column="31" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="245">
-              <caret line="92" column="13" selection-start-line="92" selection-start-column="13" selection-end-line="92" selection-end-column="13" />
+            <state relative-caret-position="188">
+              <caret line="80" column="20" selection-start-line="80" selection-start-column="20" selection-end-line="80" selection-end-column="20" />
               <folding>
                 <element signature="e#64#102#0" expanded="true" />
               </folding>
@@ -80,8 +84,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="119" column="57" selection-start-line="119" selection-start-column="57" selection-end-line="119" selection-end-column="57" />
+            <state relative-caret-position="188">
+              <caret line="187" column="9" selection-start-line="187" selection-start-column="9" selection-end-line="187" selection-end-column="9" />
               <folding>
                 <element signature="e#0#38#0" expanded="true" />
               </folding>
@@ -89,29 +93,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/crnn_model/model.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="249">
-              <caret line="34" column="71" selection-start-line="34" selection-start-column="71" selection-end-line="34" selection-end-column="71" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/tools/virtualenv/tensorflow/lib/python3.6/site-packages/tensorflow/python/ops/gen_image_ops.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1095">
-              <caret line="94" column="5" selection-start-line="94" selection-start-column="5" selection-end-line="94" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tools/inference_crnn_ctc.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1410">
-              <caret line="107" column="14" selection-start-line="107" selection-start-column="14" selection-end-line="107" selection-end-column="14" />
+            <state relative-caret-position="1485">
+              <caret line="112" column="41" selection-start-line="112" selection-start-column="41" selection-end-line="112" selection-end-column="41" />
             </state>
           </provider>
         </entry>
@@ -140,22 +126,25 @@
         <option value="$PROJECT_DIR$/char_map/char_map_CCPD.json" />
         <option value="$PROJECT_DIR$/data/anno_file.txt" />
         <option value="$PROJECT_DIR$/tools/create_image_list_CCPD.py" />
-        <option value="$PROJECT_DIR$/crnn_model/model.py" />
-        <option value="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" />
-        <option value="$PROJECT_DIR$/tools/eval_crnn_ctc.py" />
         <option value="$PROJECT_DIR$/tools/filename.xml" />
         <option value="$PROJECT_DIR$/tools/0036-0_4-315&amp;542_409&amp;574-406&amp;574_315&amp;573_318&amp;542_409&amp;543-0_0_11_2_30_26_33-75-6.xml" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/tools/create_xml_ssd_CCPD.py" />
+        <option value="$PROJECT_DIR$/tools/inference_crnn_ctc.py" />
+        <option value="$PROJECT_DIR$/src/utils.py" />
+        <option value="$PROJECT_DIR$/tools/eval_crnn_ctc.py" />
+        <option value="$PROJECT_DIR$/src/eval.py" />
         <option value="$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py" />
+        <option value="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" />
+        <option value="$PROJECT_DIR$/crnn_model/model.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="608" />
-    <option name="y" value="315" />
-    <option name="width" value="1024" />
-    <option name="height" value="555" />
+    <option name="x" value="1366" />
+    <option name="y" value="-2" />
+    <option name="width" value="1366" />
+    <option name="height" value="770" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -174,6 +163,11 @@
               <item name="crnnLicensePlateRecognition" type="b2602c69:ProjectViewProjectNode" />
               <item name="crnnLicensePlateRecognition" type="462c0819:PsiDirectoryNode" />
               <item name="crnn_model" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="crnnLicensePlateRecognition" type="b2602c69:ProjectViewProjectNode" />
+              <item name="crnnLicensePlateRecognition" type="462c0819:PsiDirectoryNode" />
+              <item name="tools" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -329,16 +323,18 @@
       <workItem from="1562839306262" duration="5178000" />
       <workItem from="1562892002149" duration="7583000" />
       <workItem from="1562900790856" duration="4413000" />
+      <workItem from="1563757446280" duration="1105000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="29410000" />
+    <option name="totallyTimeSpent" value="39126000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1366" y="25" width="1366" height="743" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.3590909" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23106061" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -352,7 +348,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.17589577" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.22964169" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -374,7 +370,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py</url>
-          <line>93</line>
+          <line>97</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
@@ -420,13 +416,6 @@
     <entry file="file://$USER_HOME$/tools/virtualenv/tensorflow/lib/python3.6/site-packages/tensorflow/contrib/rnn/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/tools/run_train.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" selection-start-line="1" selection-end-line="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/tools/virtualenv/tensorflow/lib/python3.6/site-packages/tensorflow/contrib/layers/python/layers/layers.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="157">
@@ -454,23 +443,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tools/inference_crnn_ctc.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1410">
-          <caret line="107" column="14" selection-start-line="107" selection-start-column="14" selection-end-line="107" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/eval_crnn_ctc.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-458">
-          <caret line="143" column="57" selection-start-line="143" selection-start-column="57" selection-end-line="143" selection-end-column="57" />
-          <folding>
-            <element signature="e#0#38#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/lib/python3.6/xml/etree/ElementTree.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="375">
@@ -489,23 +461,22 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tools/0036-0_4-315&amp;542_409&amp;574-406&amp;574_315&amp;573_318&amp;542_409&amp;543-0_0_11_2_30_26_33-75-6.xml" />
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$USER_HOME$/tools/virtualenv/tensorflow/lib/python3.6/site-packages/tensorflow/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="1" selection-start-line="11" selection-start-column="1" selection-end-line="11" selection-end-column="1" />
+        <state relative-caret-position="1515">
+          <caret line="101" column="48" selection-start-line="101" selection-start-column="48" selection-end-line="101" selection-end-column="48" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py">
+    <entry file="file://$USER_HOME$/tools/virtualenv/tensorflow/lib/python3.6/site-packages/tensorflow/python/ops/gen_image_ops.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="245">
-          <caret line="92" column="13" selection-start-line="92" selection-start-column="13" selection-end-line="92" selection-end-column="13" />
-          <folding>
-            <element signature="e#64#102#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="1095">
+          <caret line="94" column="5" selection-start-line="94" selection-start-column="5" selection-end-line="94" selection-end-column="5" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/utils.py" />
+    <entry file="file://$PROJECT_DIR$/src/eval.py" />
     <entry file="file://$PROJECT_DIR$/tools/run_create_crnn_tfrecord.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -513,13 +484,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tools/create_image_list_CCPD.py">
+    <entry file="file://$PROJECT_DIR$/tools/run_train.sh">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="31" selection-start-line="9" selection-start-column="31" selection-end-line="9" selection-end-column="31" />
+        <state relative-caret-position="15">
+          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="1" selection-start-line="11" selection-start-column="1" selection-end-line="11" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/eval_crnn_ctc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="143" column="8" selection-start-line="143" selection-start-column="8" selection-end-line="143" selection-end-column="8" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#0#38#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/inference_crnn_ctc.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1485">
+          <caret line="112" column="41" selection-start-line="112" selection-start-column="41" selection-end-line="112" selection-end-column="41" />
         </state>
       </provider>
     </entry>
@@ -533,27 +525,43 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="188">
+          <caret line="80" column="20" selection-start-line="80" selection-start-column="20" selection-end-line="80" selection-end-column="20" />
+          <folding>
+            <element signature="e#64#102#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/create_image_list_CCPD.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="310">
+          <caret line="21" column="15" lean-forward="true" selection-start-line="21" selection-start-column="15" selection-end-line="21" selection-end-column="15" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="119" column="57" selection-start-line="119" selection-start-column="57" selection-end-line="119" selection-end-column="57" />
+        <state relative-caret-position="188">
+          <caret line="187" column="9" selection-start-line="187" selection-start-column="9" selection-end-line="187" selection-end-column="9" />
           <folding>
             <element signature="e#0#38#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/tools/virtualenv/tensorflow/lib/python3.6/site-packages/tensorflow/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1515">
-          <caret line="101" column="48" selection-start-line="101" selection-start-column="48" selection-end-line="101" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/crnn_model/model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="249">
-          <caret line="34" column="71" selection-start-line="34" selection-start-column="71" selection-end-line="34" selection-end-column="71" />
+        <state relative-caret-position="130">
+          <caret line="56" column="36" lean-forward="true" selection-start-line="56" selection-start-column="36" selection-end-line="56" selection-end-column="36" />
+          <folding>
+            <element signature="e#210#248#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
