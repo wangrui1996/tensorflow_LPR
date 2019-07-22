@@ -138,7 +138,7 @@ def _read_test_tfrecord(tfrecord_path, num_epochs=None):
                                            'imagenames': tf.FixedLenFeature([], tf.string),
                                        })
     images = tf.image.decode_jpeg(features['images'])
-    images = tf.image.resize_images(images,(FLAGS.crop_height,FLAGS.crop_width))
+    images = tf.image.resize_images(images,(_IMAGE_HEIGHT,_IMAGE_WIDTH))
     images.set_shape([_IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
     images = tf.cast(images, tf.float32)
     labels = tf.cast(features['labels'], tf.int32)
