@@ -117,7 +117,7 @@ def _read_train_tfrecord(tfrecord_path, num_epochs=None):
     tf.image.random_contrast(images, contrast_lower, contrast_upper, seed=None)
     images = tf.image.random_brightness(images, max_delta, seed=None)
     images = tf.image.resize_with_crop_or_pad(images,_IMAGE_HEIGHT,_IMAGE_WIDTH)
-    images.set_shape([FLAGS.crop_height, FLAGS.crop_width, 3])
+    images.set_shape([_IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
     images = tf.cast(images, tf.float32)
     labels = tf.cast(features['labels'], tf.int32)
     sequence_length = tf.cast(tf.shape(images)[-2] / 8, tf.int32)

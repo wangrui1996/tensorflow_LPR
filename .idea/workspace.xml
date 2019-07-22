@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="af1cd62c-ad3a-4179-ae09-dea55b67ae02" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/crnn_model/model.py" beforeDir="false" afterPath="$PROJECT_DIR$/crnn_model/model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/create_crnn_ctc_tfrecord_CCPD.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -96,8 +94,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="218">
-              <caret line="16" selection-start-line="16" selection-end-line="16" />
+            <state relative-caret-position="128">
+              <caret line="59" selection-start-line="59" selection-end-line="59" />
               <folding>
                 <element signature="e#0#38#0" expanded="true" />
               </folding>
@@ -344,12 +342,12 @@
       <workItem from="1562839306262" duration="5178000" />
       <workItem from="1562892002149" duration="7583000" />
       <workItem from="1562900790856" duration="4413000" />
-      <workItem from="1563757446280" duration="1482000" />
+      <workItem from="1563757446280" duration="1851000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="39503000" />
+    <option name="totallyTimeSpent" value="39872000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1366" y="25" width="1366" height="743" extended-state="6" />
@@ -390,7 +388,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py</url>
-          <line>97</line>
+          <line>92</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
@@ -577,8 +575,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tools/train_crnn_ctc_CCPD.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="218">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        <state relative-caret-position="128">
+          <caret line="59" selection-start-line="59" selection-end-line="59" />
           <folding>
             <element signature="e#0#38#0" expanded="true" />
           </folding>
