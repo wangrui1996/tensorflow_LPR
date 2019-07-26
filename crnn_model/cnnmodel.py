@@ -55,22 +55,15 @@ class CRNNCTCNetwork(object):
         return tf.squeeze(input_tensor, axis=1)
 
     def __sequence_label(self, input_tensor, input_sequence_length):
+        shape = input_tensor.get_shape().as_list()
+        B, W, C = shape
         with tf.variable_scope('LSTM_Layers'):
             # forward lstm cell
-            fw_cell_list = [rnn.BasicLSTMCell(nh, forget_bias=1.0) for nh in [self.__hidden_num]*self.__layers_num]
-            # Backward direction cells
-            bw_cell_list = [rnn.BasicLSTMCell(nh, forget_bias=1.0) for nh in [self.__hidden_num]*self.__layers_num]
-            stack_lstm_layer, _, _ = rnn.stack_bidirectional_dynamic_rnn(
-                fw_cell_list, bw_cell_list, input_tensor, sequence_length=input_sequence_length, dtype=tf.float32)
-
-            [batch_size, _, hidden_num] = input_tensor.get_shape().as_list()
-            rnn_reshaped = tf.reshape(stack_lstm_layer, [-1, hidden_num])
-
             # Doing the affine projection
-            w = tf.Variable(tf.truncated_normal([hidden_num, self.__num_classes], stddev=0.01), name="w")
-            logits = tf.matmul(rnn_reshaped, w)
+            w = tf.Variable(tf.truncated_normal([B, C, self.__num_classes], stddev=0.01), name="w")
+            logits = tf.matmul(input_tensor, w)
 
-            logits = tf.reshape(logits, [batch_size, -1, self.__num_classes])
+            #logits = tf.reshape(logits, [B, -1, self.__num_classes])
             raw_pred = tf.argmax(tf.nn.softmax(logits), axis=2, name='raw_prediction')
 
             # Swap batch and batch axis
