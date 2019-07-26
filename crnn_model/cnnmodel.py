@@ -60,10 +60,11 @@ class CRNNCTCNetwork(object):
         with tf.variable_scope('LSTM_Layers'):
             # forward lstm cell
             # Doing the affine projection
-            w = tf.Variable(tf.truncated_normal([B, C, self.__num_classes], stddev=0.01), name="w")
-            logits = tf.matmul(input_tensor, w)
+            w = tf.Variable(tf.truncated_normal([C, self.__num_classes], stddev=0.01), name="w")
+            b = tf.Variable(tf.truncated_normal([self.__num_classes], stddev=0.01), name="b")
+            logits = tf.matmul(input_tensor, w) + b
 
-            #logits = tf.reshape(logits, [B, -1, self.__num_classes])
+            logits = tf.reshape(logits, [B, W, self.__num_classes])
             raw_pred = tf.argmax(tf.nn.softmax(logits), axis=2, name='raw_prediction')
 
             # Swap batch and batch axis
