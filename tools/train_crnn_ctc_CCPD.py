@@ -9,7 +9,7 @@ import json
 import tensorflow as tf
 
 import numpy as np
-from crnn_model import model
+from crnn_model import cnnmodel as model
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 _IMAGE_HEIGHT = 64
