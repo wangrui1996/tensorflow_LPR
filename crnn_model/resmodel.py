@@ -244,7 +244,10 @@ class CRNNCTCNetwork(object):
                 inputs = tf.identity(inputs, 'initial_max_pool')
 
             for i, num_blocks in enumerate(self.block_sizes_):
+
                 num_filters = self.num_filters_ * (2 ** i)
+                if i == len(self.block_sizes_) - 1:
+                    num_filters = 512
                 inputs = block_layer(
                     inputs=inputs, filters=num_filters, bottleneck=self.bottleneck,
                     block_fn=self.block_fn, blocks=num_blocks,
