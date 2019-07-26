@@ -11,7 +11,6 @@ from __future__ import print_function
 import tensorflow as tf
 from tensorflow.contrib import rnn
 from tensorflow.contrib import slim
-
 _BATCH_DECAY = 0.999
 
 class CRNNCTCNetwork(object):
@@ -46,7 +45,7 @@ class CRNNCTCNetwork(object):
             # 4 x 32
             net = slim.conv2d(net, 256, padding="VALID", kernel_size=2, stride=2, scope='conv6')
             # 2 x 32
-            net = slim.conv2d(net, 512, padding="VALID", kernel_size=[2, 1], stride=1, scope='conv6')
+            net = slim.conv2d(net, 512, padding="VALID", kernel_size=[2, 1], stride=1, scope='conv7')
         return net
     
     def __map_to_sequence(self, input_tensor):

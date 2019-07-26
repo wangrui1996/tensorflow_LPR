@@ -9,7 +9,8 @@ import json
 import tensorflow as tf
 
 import numpy as np
-from crnn_model import model
+from crnn_model import resmodel as model
+from crnn_model.resmodel import _get_block_sizes
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 _IMAGE_HEIGHT = 64
@@ -174,10 +175,25 @@ def _train_crnn_ctc():
 
     char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
     # initialise the net model
+
+    resnet_size = 51
+    if resnet_size < 50:
+        bottleneck = False
+    else:
+        bottleneck = True
     crnn_net = model.CRNNCTCNetwork(phase='train',
                                     hidden_num=FLAGS.lstm_hidden_uints,
                                     layers_num=FLAGS.lstm_hidden_layers,
-                                    num_classes=len(char_map_dict.keys()) + 1)
+                                    num_classes=len(char_map_dict.keys()) + 1,
+                                    resnet_size=resnet_size,
+                                    bottleneck= bottleneck,
+                                    num_filters= 64,
+                                    kernel_size=7,
+                                    conv_stride=2,
+                                    first_pool_size=3,
+                                    first_pool_stride=2,
+                                    block_sizes=_get_block_sizes(resnet_size),
+                                    block_strides=[1, 1, 2, 2])
  
     with tf.variable_scope('CRNN_CTC', reuse=False):
         net_out = crnn_net.build_network(images=input_images, sequence_length=input_sequence_lengths)
