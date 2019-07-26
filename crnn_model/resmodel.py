@@ -175,7 +175,7 @@ def block_layer(inputs, filters, bottleneck, block_fn, blocks, strides,
             kernel_initializer=tf.compat.v1.variance_scaling_initializer())
 
     # Only the first block per block_layer uses projection_shortcut and strides
-    inputs = block_fn(inputs, filters, training, projection_shortcut, 1)
+    inputs = block_fn(inputs, filters, training, projection_shortcut, strides)
 
     for _ in range(1, blocks):
         inputs = block_fn(inputs, filters, training, None, 1)
