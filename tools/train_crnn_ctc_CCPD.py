@@ -26,13 +26,13 @@ tf.app.flags.DEFINE_integer(
     'num_threads', 8, 'The number of threads to use in batch shuffling') 
 
 tf.app.flags.DEFINE_integer(
-    'step_per_eval', 100, 'The number of training steps to run between evaluations.')
+    'step_per_eval', 500, 'The number of training steps to run between evaluations.')
 
 tf.app.flags.DEFINE_integer(
-    'step_per_test', 1000, 'The number of training steps to run between evaluations.')
+    'step_per_test', 3000, 'The number of training steps to run between evaluations.')
 
 tf.app.flags.DEFINE_integer(
-    'step_per_save', 1000, 'The number of training steps to run between save checkpoints.')
+    'step_per_save', 3000, 'The number of training steps to run between save checkpoints.')
 
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_integer(
