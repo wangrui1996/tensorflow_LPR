@@ -39,13 +39,13 @@ tf.app.flags.DEFINE_integer(
     'batch_size', 32, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
-    'max_train_steps', 20000, 'The number of maximum iteration steps for training')
+    'max_train_steps', 200000, 'The number of maximum iteration steps for training')
 
 tf.app.flags.DEFINE_float(
     'learning_rate', 0.1, 'The initial learning rate for training.')
 
 tf.app.flags.DEFINE_integer(
-    'decay_steps', 1000, 'The learning rate decay steps for training.')
+    'decay_steps', 10000, 'The learning rate decay steps for training.')
 
 tf.app.flags.DEFINE_float(
     'decay_rate', 0.8, 'The learning rate decay rate for training.')
