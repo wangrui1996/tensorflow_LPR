@@ -1,9 +1,3 @@
-"""
-Implement for the crnn model mentioned in "An End-to-End Trainable Neural Network for Image-based Sequence
-Recognition and Its Application to Scene Text Recognition"
-
-https://arxiv.org/abs/1507.05717v1
-"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -11,298 +5,486 @@ from __future__ import print_function
 import tensorflow as tf
 from tensorflow.contrib import rnn
 from tensorflow.contrib import slim
-_BATCH_NORM_DECAY = 0.997
-_BATCH_NORM_EPSILON = 1e-5
-DEFAULT_VERSION = 2
-def _get_block_sizes(resnet_size):
-    choices = {
-        18:  [2, 2, 2, 2],
-        34:  [3, 4, 6, 3],
-        50:  [3, 4, 6, 3],
-        101: [3, 4, 23, 3],
-        152: [3, 8, 36, 3],
-        200: [3, 24, 36, 3]
-    }
-    try:
-        return choices[resnet_size]
-    except KeyError:
-        err = ('Could not find layers for selected Resnet size.\n'
-               'Size received: {}; sizes allowed: {}.'.format(resnet_size, choices.keys()))
-        raise ValueError(err)
+from tools.config import config, default
+_BATCH_DECAY = 0.999
 
-################################################################################
-# Convenience functions for building the ResNet model.
-################################################################################
-def batch_norm(inputs, training):
-  """Performs a batch normalization using a standard set of parameters."""
-  # We set fused=True for a significant performance boost. See
-  # https://www.tensorflow.org/performance/performance_guide#common_fused_ops
-  return tf.compat.v1.layers.batch_normalization(
-      inputs=inputs, axis=3,
-      momentum=_BATCH_NORM_DECAY, epsilon=_BATCH_NORM_EPSILON, center=True,
-      scale=True, training=training, fused=True)
-
-def fixed_padding(inputs, kernel_size):
-  """Pads the input along the spatial dimensions independently of input size.
-  Args:
-    inputs: A tensor of size [batch, channels, height_in, width_in] or
-      [batch, height_in, width_in, channels] depending on data_format.
-    kernel_size: The kernel to be used in the conv2d or max_pool2d operation.
-                 Should be a positive integer.
-    data_format: The input format ('channels_last' or 'channels_first').
-  Returns:
-    A tensor with the same format as the input with the data either intact
-    (if kernel_size == 1) or padded (if kernel_size > 1).
-  """
-  pad_total = kernel_size - 1
-  pad_beg = pad_total // 2
-  pad_end = pad_total - pad_beg
-  padded_inputs = tf.pad(tensor=inputs,
-                           paddings=[[0, 0], [pad_beg, pad_end],
-                                     [pad_beg, pad_end], [0, 0]])
-  return padded_inputs
-
-def conv2d_fixed_padding(inputs, filters, kernel_size, strides):
-  """Strided 2-D convolution with explicit padding."""
-  # The padding is consistent and is based only on `kernel_size`, not on the
-  # dimensions of `inputs` (as opposed to using `tf.layers.conv2d` alone).
-  if strides > 1:
-    inputs = fixed_padding(inputs, kernel_size)
-
-  return tf.compat.v1.layers.conv2d(
-      inputs=inputs, filters=filters, kernel_size=kernel_size, strides=strides,
-      padding=('SAME' if strides == 1 else 'VALID'), use_bias=False,
-      kernel_initializer=tf.compat.v1.variance_scaling_initializer())
-
-def _building_block_v1(inputs, filters, training, projection_shortcut, strides):
-    shortcut = inputs
-    if projection_shortcut is not None:
-        shortcut = projection_shortcut(inputs)
-        shortcut = batch_norm(inputs=shortcut, training=training)
-    inputs = conv2d_fixed_padding(inputs=inputs, filters=filters,
-                                  kernel_size=3, strides=strides)
-    inputs = batch_norm(inputs, training)
-    inputs = tf.nn.relu(inputs)
-
-    inputs = conv2d_fixed_padding(inputs=inputs, filters=filters,
-                                  kernel_size=3, strides=1)
-    inputs = batch_norm(inputs, training)
-    inputs += shortcut
-    inputs = tf.nn.relu(inputs)
-
-    return inputs
+def Conv(**kwargs):
+    #name = kwargs.get('name')
+    #_weight = mx.symbol.Variable(name+'_weight')
+    #_bias = mx.symbol.Variable(name+'_bias', lr_mult=2.0, wd_mult=0.0)
+    #body = mx.sym.Convolution(weight = _weight, bias = _bias, **kwargs)
+    body = slim.conv2d(**kwargs)
+    return body
 
 
-def _building_block_v2(inputs, filters, training, projection_shortcut, strides):
-    shortcut = inputs
-    inputs = batch_norm(inputs, training)
-    inputs = tf.nn.relu(inputs)
+def Act(data, act_type, name):
+    if act_type=='prelu':
+        body = tf.nn.leaky_relu(data, alpha=0.01, name=name)
+    else:
+        body = tf.nn.relu(data, name=name)
+    return body
 
-    # The projection shortcut should come after the first batch norm and ReLU
-    # since it performs a 1x1 convolution.
-    if projection_shortcut is not None:
-        shortcut = projection_shortcut(inputs)
+def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
+    """Return ResNet Unit symbol for building ResNet
+    Parameters
+    ----------
+    data : str
+        Input data
+    num_filter : int
+        Number of output channels
+    bnf : int
+        Bottle neck channels factor with regard to num_filter
+    stride : tuple
+        Stride used in convolution
+    dim_match : Boolean
+        True means channel number between input and output is the same, otherwise means differ
+    name : str
+        Base name of the operators
+    workspace : int
+        Workspace used in convolution operator
+    """
+    use_se = kwargs.get('version_se', 1)
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
+    memonger = kwargs.get('memonger', False)
+    act_type = kwargs.get('version_act', 'prelu')
+    #print('in unit1')
+    if bottle_neck:
+        conv1 = Conv(inputs=data, num_outputs=int(num_filter*0.25), kernel_size=(1,1), stride=stride, pad=(0,0),
+                     normalizer_fn = slim.batch_norm, scope=name + '_conv1')
+        bn1 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
+        act1 = Act(data=bn1, act_type=act_type, name=name + '_relu1')
+        conv2 = Conv(data=act1, num_filter=int(num_filter*0.25), kernel=(3,3), stride=(1,1), pad=(1,1),
+                                   no_bias=True, workspace=workspace, name=name + '_conv2')
+        bn2 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
+        act2 = Act(data=bn2, act_type=act_type, name=name + '_relu2')
+        conv3 = Conv(data=act2, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0), no_bias=True,
+                                   workspace=workspace, name=name + '_conv3')
+        bn3 = mx.sym.BatchNorm(data=conv3, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
 
-    inputs = conv2d_fixed_padding(inputs=inputs, filters=filters,
-                                  kernel_size=3, strides=strides)
+        if use_se:
+          #se begin
+          body = mx.sym.Pooling(data=bn3, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+          body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv1", workspace=workspace)
+          body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+          body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv2", workspace=workspace)
+          body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+          bn3 = mx.symbol.broadcast_mul(bn3, body)
+          #se end
 
-    inputs = batch_norm(inputs, training)
-    inputs = tf.nn.relu(inputs)
-    inputs = conv2d_fixed_padding(inputs=inputs, filters=filters,
-                                  kernel_size=3, strides=1)
-    return inputs + shortcut
-
-def _bottleneck_block_v1(inputs, filters, training, projection_shortcut,
-                         strides):
-    shortcut = inputs
-    if projection_shortcut is not None:
-        shortcut = projection_shortcut(inputs)
-        shortcut = batch_norm(inputs=shortcut, training=training)
-
-    inputs = conv2d_fixed_padding(inputs=inputs, filters=filters, kernel_size=1, strides=1)
-    inputs = batch_norm(inputs, training)
-    inputs = tf.nn.relu(inputs)
-
-    inputs = conv2d_fixed_padding(
-        inputs=inputs, filters=filters, kernel_size=3, strides=strides)
-    inputs = batch_norm(inputs, training)
-    inputs = tf.nn.relu(inputs)
-
-    inputs = conv2d_fixed_padding(
-        inputs=inputs, filters=4 * filters, kernel_size=1, strides=1)
-    inputs = batch_norm(inputs, training)
-    inputs += shortcut
-    inputs = tf.nn.relu(inputs)
-
-    return inputs
-
-def _bottleneck_block_v2(inputs, filters, training, projection_shortcut,
-                         strides):
-  shortcut = inputs
-  inputs = batch_norm(inputs, training)
-  inputs = tf.nn.relu(inputs)
-
-  # The projection shortcut should come after the first batch norm and ReLU
-  # since it performs a 1x1 convolution.
-  if projection_shortcut is not None:
-    shortcut = projection_shortcut(inputs)
-
-  inputs = conv2d_fixed_padding(
-      inputs=inputs, filters=filters, kernel_size=1, strides=1)
-
-  inputs = batch_norm(inputs, training)
-  inputs = tf.nn.relu(inputs)
-  inputs = conv2d_fixed_padding(
-      inputs=inputs, filters=filters, kernel_size=3, strides=strides)
-
-  inputs = batch_norm(inputs, training)
-  inputs = tf.nn.relu(inputs)
-  inputs = conv2d_fixed_padding(
-      inputs=inputs, filters=4 * filters, kernel_size=1, strides=1)
-
-  return inputs + shortcut
-
-def block_layer(inputs, filters, bottleneck, block_fn, blocks, strides,
-                training, name):
-
-    # Bottleneck blocks end with 4x the number of filters as they start with
-    filters_out = filters * 4 if bottleneck else filters
-
-    def projection_shortcut(inputs):
-        return tf.compat.v1.layers.conv2d(
-            inputs=inputs, filters=filters_out, kernel_size=strides, strides=strides,
-            padding=('SAME' if strides == 1 else 'VALID'), use_bias=False,
-            kernel_initializer=tf.compat.v1.variance_scaling_initializer())
-
-    # Only the first block per block_layer uses projection_shortcut and strides
-    inputs = block_fn(inputs, filters, training, projection_shortcut, strides)
-
-    for _ in range(1, blocks):
-        inputs = block_fn(inputs, filters, training, None, 1)
-
-    return tf.identity(inputs, name)
-
-class CRNNCTCNetwork(object):
-    def __init__(self, phase, hidden_num, layers_num, num_classes,
-                 resnet_size, bottleneck, num_filters,
-                 kernel_size, conv_stride, first_pool_size,
-                 first_pool_stride,
-                 block_sizes, block_strides,
-                 resnet_version = DEFAULT_VERSION):
-
-        self.phase_ = phase.lower()
-        self.hidden_num_ = hidden_num
-        self.layers_num_ = layers_num
-        self.num_classes_ = num_classes
-
-        self.resnet_size_ = resnet_size
-        self.bottleneck = bottleneck
-        self.num_filters_ = num_filters
-        self.kernel_size_ = kernel_size
-        self.conv_stride_ = conv_stride
-        self.first_pool_size_ = first_pool_size
-        self.first_pool_stride_ = first_pool_stride
-        self.block_sizes_ = block_sizes
-        self.block_strides_ = block_strides
-        self.resnet_version_ = resnet_version
-        self.pre_activation_ = resnet_version == 2
-
-        # ----------------------------- resnet ---------------------
-        if bottleneck:
-            if self.resnet_version_ == 1:
-                self.block_fn = _bottleneck_block_v1
-            else:
-                self.block_fn = _bottleneck_block_v2
+        if dim_match:
+            shortcut = data
         else:
-            if self.resnet_version_ == 1:
-                self.block_fn = _building_block_v1
-            else:
-                self.block_fn = _building_block_v2
+            conv1sc = Conv(data=data, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                            workspace=workspace, name=name+'_conv1sc')
+            shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_sc')
+        if memonger:
+            shortcut._set_attr(mirror_stage='True')
+        return Act(data=bn3 + shortcut, act_type=act_type, name=name + '_relu3')
+    else:
+        conv1 = Conv(data=data, num_filter=num_filter, kernel=(3,3), stride=stride, pad=(1,1),
+                                      no_bias=True, workspace=workspace, name=name + '_conv1')
+        bn1 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn1')
+        act1 = Act(data=bn1, act_type=act_type, name=name + '_relu1')
+        conv2 = Conv(data=act1, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1,1),
+                                      no_bias=True, workspace=workspace, name=name + '_conv2')
+        bn2 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn2')
+        if use_se:
+          #se begin
+          body = mx.sym.Pooling(data=bn2, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+          body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv1", workspace=workspace)
+          body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+          body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv2", workspace=workspace)
+          body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+          bn2 = mx.symbol.broadcast_mul(bn2, body)
+          #se end
+
+        if dim_match:
+            shortcut = data
+        else:
+            conv1sc = Conv(data=data, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                            workspace=workspace, name=name+'_conv1sc')
+            shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_sc')
+        if memonger:
+            shortcut._set_attr(mirror_stage='True')
+        return Act(data=bn2 + shortcut, act_type=act_type, name=name + '_relu3')
+
+def residual_unit_v1_L(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
+    """Return ResNet Unit symbol for building ResNet
+    Parameters
+    ----------
+    data : str
+        Input data
+    num_filter : int
+        Number of output channels
+    bnf : int
+        Bottle neck channels factor with regard to num_filter
+    stride : tuple
+        Stride used in convolution
+    dim_match : Boolean
+        True means channel number between input and output is the same, otherwise means differ
+    name : str
+        Base name of the operators
+    workspace : int
+        Workspace used in convolution operator
+    """
+    use_se = kwargs.get('version_se', 1)
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
+    memonger = kwargs.get('memonger', False)
+    act_type = kwargs.get('version_act', 'prelu')
+    #print('in unit1')
+    if bottle_neck:
+        conv1 = Conv(data=data, num_filter=int(num_filter*0.25), kernel=(1,1), stride=(1,1), pad=(0,0),
+                                   no_bias=True, workspace=workspace, name=name + '_conv1')
+        bn1 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
+        act1 = Act(data=bn1, act_type=act_type, name=name + '_relu1')
+        conv2 = Conv(data=act1, num_filter=int(num_filter*0.25), kernel=(3,3), stride=(1,1), pad=(1,1),
+                                   no_bias=True, workspace=workspace, name=name + '_conv2')
+        bn2 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
+        act2 = Act(data=bn2, act_type=act_type, name=name + '_relu2')
+        conv3 = Conv(data=act2, num_filter=num_filter, kernel=(1,1), stride=stride, pad=(0,0), no_bias=True,
+                                   workspace=workspace, name=name + '_conv3')
+        bn3 = mx.sym.BatchNorm(data=conv3, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
+
+        if use_se:
+          #se begin
+          body = mx.sym.Pooling(data=bn3, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+          body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv1", workspace=workspace)
+          body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+          body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv2", workspace=workspace)
+          body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+          bn3 = mx.symbol.broadcast_mul(bn3, body)
+          #se end
+
+        if dim_match:
+            shortcut = data
+        else:
+            conv1sc = Conv(data=data, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                            workspace=workspace, name=name+'_conv1sc')
+            shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_sc')
+        if memonger:
+            shortcut._set_attr(mirror_stage='True')
+        return Act(data=bn3 + shortcut, act_type=act_type, name=name + '_relu3')
+    else:
+        conv1 = Conv(data=data, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1,1),
+                                      no_bias=True, workspace=workspace, name=name + '_conv1')
+        bn1 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn1')
+        act1 = Act(data=bn1, act_type=act_type, name=name + '_relu1')
+        conv2 = Conv(data=act1, num_filter=num_filter, kernel=(3,3), stride=stride, pad=(1,1),
+                                      no_bias=True, workspace=workspace, name=name + '_conv2')
+        bn2 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn2')
+        if use_se:
+          #se begin
+          body = mx.sym.Pooling(data=bn2, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+          body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv1", workspace=workspace)
+          body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+          body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv2", workspace=workspace)
+          body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+          bn2 = mx.symbol.broadcast_mul(bn2, body)
+          #se end
+
+        if dim_match:
+            shortcut = data
+        else:
+            conv1sc = Conv(data=data, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                            workspace=workspace, name=name+'_conv1sc')
+            shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_sc')
+        if memonger:
+            shortcut._set_attr(mirror_stage='True')
+        return Act(data=bn2 + shortcut, act_type=act_type, name=name + '_relu3')
+
+def residual_unit_v2(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
+    """Return ResNet Unit symbol for building ResNet
+    Parameters
+    ----------
+    data : str
+        Input data
+    num_filter : int
+        Number of output channels
+    bnf : int
+        Bottle neck channels factor with regard to num_filter
+    stride : tuple
+        Stride used in convolution
+    dim_match : Boolean
+        True means channel number between input and output is the same, otherwise means differ
+    name : str
+        Base name of the operators
+    workspace : int
+        Workspace used in convolution operator
+    """
+    use_se = kwargs.get('version_se', 1)
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
+    memonger = kwargs.get('memonger', False)
+    act_type = kwargs.get('version_act', 'prelu')
+    #print('in unit2')
+    if bottle_neck:
+        # the same as https://github.com/facebook/fb.resnet.torch#notes, a bit difference with origin paper
+        bn1 = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
+        act1 = Act(data=bn1, act_type=act_type, name=name + '_relu1')
+        conv1 = Conv(data=act1, num_filter=int(num_filter*0.25), kernel=(1,1), stride=(1,1), pad=(0,0),
+                                   no_bias=True, workspace=workspace, name=name + '_conv1')
+        bn2 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
+        act2 = Act(data=bn2, act_type=act_type, name=name + '_relu2')
+        conv2 = Conv(data=act2, num_filter=int(num_filter*0.25), kernel=(3,3), stride=stride, pad=(1,1),
+                                   no_bias=True, workspace=workspace, name=name + '_conv2')
+        bn3 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
+        act3 = Act(data=bn3, act_type=act_type, name=name + '_relu3')
+        conv3 = Conv(data=act3, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0), no_bias=True,
+                                   workspace=workspace, name=name + '_conv3')
+        if use_se:
+          #se begin
+          body = mx.sym.Pooling(data=conv3, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+          body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv1", workspace=workspace)
+          body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+          body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv2", workspace=workspace)
+          body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+          conv3 = mx.symbol.broadcast_mul(conv3, body)
+        if dim_match:
+            shortcut = data
+        else:
+            shortcut = Conv(data=act1, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                            workspace=workspace, name=name+'_sc')
+        if memonger:
+            shortcut._set_attr(mirror_stage='True')
+        return conv3 + shortcut
+    else:
+        bn1 = mx.sym.BatchNorm(data=data, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn1')
+        act1 = Act(data=bn1, act_type=act_type, name=name + '_relu1')
+        conv1 = Conv(data=act1, num_filter=num_filter, kernel=(3,3), stride=stride, pad=(1,1),
+                                      no_bias=True, workspace=workspace, name=name + '_conv1')
+        bn2 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn2')
+        act2 = Act(data=bn2, act_type=act_type, name=name + '_relu2')
+        conv2 = Conv(data=act2, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1,1),
+                                      no_bias=True, workspace=workspace, name=name + '_conv2')
+        if use_se:
+          #se begin
+          body = mx.sym.Pooling(data=conv2, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+          body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv1", workspace=workspace)
+          body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+          body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv2", workspace=workspace)
+          body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+          conv2 = mx.symbol.broadcast_mul(conv2, body)
+        if dim_match:
+            shortcut = data
+        else:
+            shortcut = Conv(data=act1, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                            workspace=workspace, name=name+'_sc')
+        if memonger:
+            shortcut._set_attr(mirror_stage='True')
+        return conv2 + shortcut
+
+def residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
+
+    """Return ResNet Unit symbol for building ResNet
+    Parameters
+    ----------
+    data : str
+        Input data
+    num_filter : int
+        Number of output channels
+    bnf : int
+        Bottle neck channels factor with regard to num_filter
+    stride : tuple
+        Stride used in convolution
+    dim_match : Boolean
+        True means channel number between input and output is the same, otherwise means differ
+    name : str
+        Base name of the operators
+    workspace : int
+        Workspace used in convolution operator
+    """
+    use_se = kwargs.get('version_se', 1)
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
+    memonger = kwargs.get('memonger', False)
+    act_type = kwargs.get('version_act', 'prelu')
+    #print('in unit3')
+    if bottle_neck:
+        bn1 = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
+        conv1 = Conv(data=bn1, num_filter=int(num_filter*0.25), kernel=(1,1), stride=(1,1), pad=(0,0),
+                                   no_bias=True, workspace=workspace, name=name + '_conv1')
+        bn2 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
+        act1 = Act(data=bn2, act_type=act_type, name=name + '_relu1')
+        conv2 = Conv(data=act1, num_filter=int(num_filter*0.25), kernel=(3,3), stride=(1,1), pad=(1,1),
+                                   no_bias=True, workspace=workspace, name=name + '_conv2')
+        bn3 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
+        act2 = Act(data=bn3, act_type=act_type, name=name + '_relu2')
+        conv3 = Conv(data=act2, num_filter=num_filter, kernel=(1,1), stride=stride, pad=(0,0), no_bias=True,
+                                   workspace=workspace, name=name + '_conv3')
+        bn4 = mx.sym.BatchNorm(data=conv3, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn4')
+
+        if use_se:
+          #se begin
+          body = mx.sym.Pooling(data=bn4, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+          body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv1", workspace=workspace)
+          body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+          body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv2", workspace=workspace)
+          body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+          bn4 = mx.symbol.broadcast_mul(bn4, body)
+          #se end
+
+        if dim_match:
+            shortcut = data
+        else:
+            conv1sc = Conv(data=data, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                            workspace=workspace, name=name+'_conv1sc')
+            shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_sc')
+        if memonger:
+            shortcut._set_attr(mirror_stage='True')
+        return bn4 + shortcut
+    else:
+        bn1 = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
+        conv1 = Conv(data=bn1, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1,1),
+                                      no_bias=True, workspace=workspace, name=name + '_conv1')
+        bn2 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
+        act1 = Act(data=bn2, act_type=act_type, name=name + '_relu1')
+        conv2 = Conv(data=act1, num_filter=num_filter, kernel=(3,3), stride=stride, pad=(1,1),
+                                      no_bias=True, workspace=workspace, name=name + '_conv2')
+        bn3 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
+        if use_se:
+          #se begin
+          body = mx.sym.Pooling(data=bn3, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+          body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv1", workspace=workspace)
+          body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+          body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                    name=name+"_se_conv2", workspace=workspace)
+          body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+          bn3 = mx.symbol.broadcast_mul(bn3, body)
+          #se end
+
+        if dim_match:
+            shortcut = data
+        else:
+            conv1sc = Conv(data=data, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                            workspace=workspace, name=name+'_conv1sc')
+            shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_sc')
+        if memonger:
+            shortcut._set_attr(mirror_stage='True')
+        return bn3 + shortcut
+
+def residual_unit_v3_x(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
+
+    """Return ResNeXt Unit symbol for building ResNeXt
+    Parameters
+    ----------
+    data : str
+        Input data
+    num_filter : int
+        Number of output channels
+    bnf : int
+        Bottle neck channels factor with regard to num_filter
+    stride : tuple
+        Stride used in convolution
+    dim_match : Boolean
+        True means channel number between input and output is the same, otherwise means differ
+    name : str
+        Base name of the operators
+    workspace : int
+        Workspace used in convolution operator
+    """
+    assert(bottle_neck)
+    use_se = kwargs.get('version_se', 1)
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
+    memonger = kwargs.get('memonger', False)
+    act_type = kwargs.get('version_act', 'prelu')
+    num_group = 32
+    #print('in unit3')
+    bn1 = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
+    conv1 = Conv(data=bn1, num_group=num_group, num_filter=int(num_filter*0.5), kernel=(1,1), stride=(1,1), pad=(0,0),
+                               no_bias=True, workspace=workspace, name=name + '_conv1')
+    bn2 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
+    act1 = Act(data=bn2, act_type=act_type, name=name + '_relu1')
+    conv2 = Conv(data=act1, num_group=num_group, num_filter=int(num_filter*0.5), kernel=(3,3), stride=(1,1), pad=(1,1),
+                               no_bias=True, workspace=workspace, name=name + '_conv2')
+    bn3 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
+    act2 = Act(data=bn3, act_type=act_type, name=name + '_relu2')
+    conv3 = Conv(data=act2, num_filter=num_filter, kernel=(1,1), stride=stride, pad=(0,0), no_bias=True,
+                               workspace=workspace, name=name + '_conv3')
+    bn4 = mx.sym.BatchNorm(data=conv3, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn4')
+
+    if use_se:
+      #se begin
+      body = mx.sym.Pooling(data=bn4, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+      body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                name=name+"_se_conv1", workspace=workspace)
+      body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
+      body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                name=name+"_se_conv2", workspace=workspace)
+      body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+      bn4 = mx.symbol.broadcast_mul(bn4, body)
+      #se end
+
+    if dim_match:
+        shortcut = data
+    else:
+        conv1sc = Conv(data=data, num_filter=num_filter, kernel=(1,1), stride=stride, no_bias=True,
+                                        workspace=workspace, name=name+'_conv1sc')
+        shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_sc')
+    if memonger:
+        shortcut._set_attr(mirror_stage='True')
+    return bn4 + shortcut
 
 
 
-    def _model_variable_scope(self):
-        return tf.compat.v1.variable_scope('resnet_model')
+def build_network(images, num_classes=default.num_classes, phase="test"):
+    # first apply the cnn feature extraction stage
+    is_training = True if phase == 'train' else False
+    with slim.arg_scope([slim.conv2d],
+                        weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
+                        weights_regularizer=slim.l2_regularizer(0.0005),
+                        biases_initializer=None):
+        net = slim.repeat(images, 2, slim.conv2d, 32, kernel_size=3, stride=1, scope='conv1')
+        net = slim.max_pool2d(net, kernel_size=2, stride=2, scope='pool1')
+        # 32 x 64
+        net = slim.repeat(net, 2, slim.conv2d, 64, kernel_size=3, stride=1, scope='conv2')
+        net = slim.max_pool2d(net, kernel_size=2, stride=2, scope='pool2')
+        # 16 x 32
+        net = slim.repeat(net, 2, slim.conv2d, 128, kernel_size=3, stride=1, scope='conv3')
+        net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool3')
+        # 8 x 32
+        net = slim.conv2d(net, 256, kernel_size=3, stride=1, scope='conv4')
+        net = slim.batch_norm(net, decay=_BATCH_DECAY, is_training=is_training, scope='bn4')
+        net = slim.conv2d(net, 256, kernel_size=3, stride=1, scope='conv5')
+        net = slim.batch_norm(net, decay=_BATCH_DECAY, is_training=is_training, scope='bn5')
+        net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool5')
+        # 4 x 32
+        net = slim.conv2d(net, 256, padding="VALID", kernel_size=2, stride=2, scope='conv6')
+        # 2 x 32
+        cnn_out = slim.conv2d(net, 512, padding="VALID", kernel_size=[2, 1], stride=1, scope='conv7')
+        # 1 x 32
+    # second apply the map to sequence stage
+    shape = cnn_out.get_shape().as_list()
+    assert shape[1] == 1
+    sequence = tf.squeeze(cnn_out, axis=1)
+    # third apply the sequence label stage
+    shape = sequence.get_shape().as_list()
+    B, W, C = shape
+    with tf.variable_scope('Softmax_Layers'):
+        # forward lstm cell
+        # Doing the affine projection
+        w = tf.Variable(tf.truncated_normal([C, num_classes], stddev=0.01), name="w")
+        b = tf.Variable(tf.truncated_normal([num_classes], stddev=0.01), name="b")
+        logits = tf.matmul(sequence, w) + b
 
-    def __feature_sequence_extraction(self, inputs):
-        training = True if self.phase_ == 'train' else False
-        with self._model_variable_scope():
-            inputs = conv2d_fixed_padding(
-                inputs=inputs, filters=self.num_filters_, kernel_size=self.kernel_size_,
-                strides=self.conv_stride_)
-            # / 2
-            inputs = tf.identity(inputs, 'initial_conv')
-
-            if self.resnet_version_ == 1:
-                inputs = batch_norm(inputs, training)
-                inputs = tf.nn.relu(inputs)
-
-            if self.first_pool_size_:
-                inputs = tf.compat.v1.layers.max_pooling2d(inputs=inputs, pool_size=self.first_pool_size_,
-                                                           strides=self.first_pool_stride_, padding='SAME')
-                # /2
-                inputs = tf.identity(inputs, 'initial_max_pool')
-
-            for i, num_blocks in enumerate(self.block_sizes_):
-
-                num_filters = self.num_filters_ * (2 ** i)
-                if i == len(self.block_sizes_) - 1:
-                    num_filters = 512
-                inputs = block_layer(
-                    inputs=inputs, filters=num_filters, bottleneck=self.bottleneck,
-                    block_fn=self.block_fn, blocks=num_blocks,
-                    strides=self.block_strides_[i], training=training,
-                    name='block_layer{}'.format(i + 1))
-
-            # Only apply the BN and ReLU for model that does pre_activation in each
-            # building/bottleneck block, eg resnet V2.
-            if self.pre_activation_:
-                inputs = batch_norm(inputs, training)
-                inputs = tf.nn.relu(inputs)
-
-            # The current top layer has shape
-            # `batch_size x pool_size x pool_size x final_size`.
-            # ResNet does an Average Pooling layer over pool_size,
-            # but that is the same as doing a reduce_mean. We do a reduce_mean
-            # here because it performs better than AveragePooling2D.
-            axes = [1]
-            inputs = tf.reduce_mean(input_tensor=inputs, axis=axes, keepdims=True)
-            inputs = tf.identity(inputs, 'final_reduce_mean')
-        return inputs
-    
-    def __map_to_sequence(self, input_tensor):
-        shape = input_tensor.get_shape().as_list()
-        assert shape[1] == 1  # H of the feature map must equal to 1
-        return tf.squeeze(input_tensor, axis=1)
-
-    def __sequence_label(self, input_tensor, input_sequence_length):
-        with tf.variable_scope('LSTM_Layers'):
-            # forward lstm cell
-            fw_cell_list = [rnn.BasicLSTMCell(nh, forget_bias=1.0) for nh in [self.hidden_num_]*self.layers_num_]
-            # Backward direction cells
-            bw_cell_list = [rnn.BasicLSTMCell(nh, forget_bias=1.0) for nh in [self.hidden_num_]*self.layers_num_]
-            stack_lstm_layer, _, _ = rnn.stack_bidirectional_dynamic_rnn(
-                fw_cell_list, bw_cell_list, input_tensor, sequence_length=input_sequence_length, dtype=tf.float32)
-
-            [batch_size, _, hidden_num] = input_tensor.get_shape().as_list()
-            rnn_reshaped = tf.reshape(stack_lstm_layer, [-1, hidden_num])
-
-            # Doing the affine projection
-            w = tf.Variable(tf.truncated_normal([hidden_num, self.num_classes_], stddev=0.01), name="w")
-            logits = tf.matmul(rnn_reshaped, w)
-           
-            logits = tf.reshape(logits, [batch_size, -1, self.num_classes_])
-            raw_pred = tf.argmax(tf.nn.softmax(logits), axis=2, name='raw_prediction')
-
-            # Swap batch and batch axis
-            rnn_out = tf.transpose(logits, (1, 0, 2), name='transpose_time_major')
-        return rnn_out, raw_pred
-
-    def build_network(self, images, sequence_length=None):
-        # first apply the cnn feature extraction stage
-        cnn_out = self.__feature_sequence_extraction(images)
-        # second apply the map to sequence stage
-        sequence = self.__map_to_sequence(input_tensor=cnn_out)
-        # third apply the sequence label stage
-        net_out, raw_pred = self.__sequence_label(input_tensor=sequence, input_sequence_length=sequence_length)
-        return net_out
+        logits = tf.reshape(logits, [B, W, num_classes])
+        # Swap batch and batch axis
+        net_out = tf.transpose(logits, (1, 0, 2), name='transpose_time_major')
+    return net_out

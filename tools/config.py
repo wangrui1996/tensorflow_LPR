@@ -39,7 +39,16 @@ network.y2.emb_size = 256
 network.y2.net_output = 'GDC'
 network.y2.net_output = 'E'
 network.y2.net_blocks = [2,8,16,4]
-#network.y2.net_blocks = [2,2,2,2]
+
+network.r50 = edict()
+network.r50.net_name = 'resnet'
+network.r50.resnet_size = 1
+network.r50.bottleneck  =1
+network.r50.num_filters_ = 1
+network.r50.kernel_size_ = 2
+network.r50.conv_stride_ = 1
+
+
 
 # dataset settings
 dataset = edict()
@@ -70,8 +79,6 @@ default.max_train_steps = 200000
 default.learning_rate = 0.1
 default.decay_steps = 10000
 default.decay_rate = 0.8
-default.lstm_hidden_layers = 2
-default.lstm_hidden_uints = 256
 
 # default network
 default.network = 'y2'
@@ -92,20 +99,10 @@ default.per_batch_size = 1
 default.ckpt = 3
 default.lr_steps = '100000,160000,220000'
 default.models_root = './jobs'
-
-def generate_config(_network, _dataset, _loss):
-    for k, v in loss[_loss].items():
-        config[k] = v
-        if k in default:
-            default[k] = v
+default.num_classes = 24
+def generate_config(_network):
     for k, v in network[_network].items():
         config[k] = v
         if k in default:
             default[k] = v
-    for k, v in dataset[_dataset].items():
-        config[k] = v
-        if k in default:
-            default[k] = v
-    config.loss = _loss
     config.network = _network
-    config.dataset = _dataset

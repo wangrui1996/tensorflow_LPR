@@ -19,13 +19,13 @@ def parse_args():
     parser.add_argument("--loss", default=default.loss, help="loss config")
     parser.add_argument("--dataset", default=default.dataset, help="dataset")
     args, rest = parser.parse_known_args()
-    generate_config(args.network, args.dataset, args.loss)
+    #generate_config(args.network, args.dataset, args.loss)
     args = parser.parse_args()
     return args
 
 parse_args()
 
-os.environ["CUDA_VISIBLE_DEVICES"]=config.CUDA_VISIBLE_DEVICES
+os.environ["CUDA_VISIBLE_DEVICES"]=default.CUDA_VISIBLE_DEVICES
 _IMAGE_HEIGHT = config.image_height
 _IMAGE_WIDTH = config.image_width
 
