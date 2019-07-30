@@ -12,31 +12,33 @@ import random
 import json
 
 import tensorflow as tf
-
 import cv2
 import numpy as np
 
-_IMAGE_HEIGHT = 64
-_IMAGE_WIDTH = 128
+from tools.config import config, default
+
+_IMAGE_HEIGHT = config.image_height
+_IMAGE_WIDTH = config.image_width
+
 _CROP_SIZE = 5
 
 tf.app.flags.DEFINE_string(
-    'image_dir', './data/images/', 'Dataset root folder with images.')
+    'image_dir', default.image_dir, 'Dataset root folder with images.')
 
 tf.app.flags.DEFINE_string(
-    'anno_file', './data/anno_file.txt', 'Path of dataset annotation file.')
+    'anno_file', default.anno_file, 'Path of dataset annotation file.')
 
 tf.app.flags.DEFINE_string(
-    'data_dir', './data/', 'Directory where tfrecords are written to.')
+    'data_dir', default.data_dir, 'Directory where tfrecords are written to.')
 
 tf.app.flags.DEFINE_float(
-    'validation_split_fraction', 0.1, 'Fraction of training data to use for validation.')
+    'validation_split_fraction', default.validation_split_fraction, 'Fraction of training data to use for validation.')
 
 tf.app.flags.DEFINE_boolean(
-    'shuffle_list', True, 'Whether shuffle data in annotation file list.')
+    'shuffle_list', default.shuffle_list, 'Whether shuffle data in annotation file list.')
 
 tf.app.flags.DEFINE_string(
-    'char_map_json_file', './char_map/plate_map.json', 'Path to char map json file')
+    'char_map_json_file', default.char_map_json_file, 'Path to char map json file')
 
 FLAGS = tf.app.flags.FLAGS
 

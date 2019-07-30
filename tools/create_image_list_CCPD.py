@@ -1,15 +1,15 @@
 import os
 import cv2
+from tools.config import dataset
 from concurrent.futures import ThreadPoolExecutor
 import multiprocessing
 import json
 
 thread_num = 100
-image_list_path = "./data/anno_file.txt"
-dataset_path = "./data/CCPD2019/ccpd_base"
-data_save_path = "./data/images"
 
-
+image_list_path = dataset.image_list_path
+dataset_path = dataset.dataset_path
+data_save_path = dataset.data_save_path
 
 char_label_map_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "char_map/char_map_CCPD.json")
 with open(char_label_map_path, "r") as f:

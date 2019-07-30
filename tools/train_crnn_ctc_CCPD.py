@@ -5,62 +5,76 @@ from __future__ import print_function
 import os
 import time
 import json
-
+import argparse
+import numpy as np
 import tensorflow as tf
 
-import numpy as np
 from crnn_model import cnnmodel as model
+from tools.config import config, generate_config, default
 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
-_IMAGE_HEIGHT = 64
-_IMAGE_WIDTH = 128
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train face network")
+    # general
+    parser.add_argument("--network", default=default.network, help="network config")
+    parser.add_argument("--loss", default=default.loss, help="loss config")
+    parser.add_argument("--dataset", default=default.dataset, help="dataset")
+    args, rest = parser.parse_known_args()
+    generate_config(args.network, args.dataset, args.loss)
+    args = parser.parse_args()
+    return args
+
+parse_args()
+
+os.environ["CUDA_VISIBLE_DEVICES"]=config.CUDA_VISIBLE_DEVICES
+_IMAGE_HEIGHT = config.image_height
+_IMAGE_WIDTH = config.image_width
 
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_string(
-    'data_dir', './tfrecords/', 'Path to the directory containing data tf record.')
+    'data_dir', default.data_dir, 'Path to the directory containing data tf record.')
 
 tf.app.flags.DEFINE_string(
-    'model_dir', './model/', 'Base directory for the model.')
+    'model_dir', default.model_dir, 'Base directory for the model.')
 
 tf.app.flags.DEFINE_integer(
-    'num_threads', 8, 'The number of threads to use in batch shuffling') 
+    'num_threads', default.num_threads, 'The number of threads to use in batch shuffling')
 
 tf.app.flags.DEFINE_integer(
-    'step_per_eval', 500, 'The number of training steps to run between evaluations.')
+    'step_per_eval', default.step_per_eval, 'The number of training steps to run between evaluations.')
 
 tf.app.flags.DEFINE_integer(
-    'step_per_test', 3000, 'The number of training steps to run between evaluations.')
+    'step_per_test', default.step_per_test, 'The number of training steps to run between evaluations.')
 
 tf.app.flags.DEFINE_integer(
-    'step_per_save', 3000, 'The number of training steps to run between save checkpoints.')
+    'step_per_save', default.step_per_save, 'The number of training steps to run between save checkpoints.')
 
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_integer(
-    'batch_size', 32, 'The number of samples in each batch.')
+    'batch_size', default.batch_size, 'The number of samples in each batch.')
 
 tf.app.flags.DEFINE_integer(
-    'max_train_steps', 200000, 'The number of maximum iteration steps for training')
+    'max_train_steps', default.max_train_steps, 'The number of maximum iteration steps for training')
 
 tf.app.flags.DEFINE_float(
-    'learning_rate', 0.1, 'The initial learning rate for training.')
+    'learning_rate', default.learning_rate, 'The initial learning rate for training.')
 
 tf.app.flags.DEFINE_integer(
-    'decay_steps', 10000, 'The learning rate decay steps for training.')
+    'decay_steps', default.decay_steps, 'The learning rate decay steps for training.')
 
 tf.app.flags.DEFINE_float(
-    'decay_rate', 0.8, 'The learning rate decay rate for training.')
+    'decay_rate', default.decay_rate, 'The learning rate decay rate for training.')
 
 # ------------------------------------LSTM prameters------------------------------------
 tf.app.flags.DEFINE_integer(
-    'lstm_hidden_layers', 2, 'The number of stacked LSTM cell.')
+    'lstm_hidden_layers', default.lstm_hidden_layers , 'The number of stacked LSTM cell.')
 
 tf.app.flags.DEFINE_integer(
-    'lstm_hidden_uints', 256, 'The number of units in each LSTM cell')
+    'lstm_hidden_uints', default.lstm_hidden_uints, 'The number of units in each LSTM cell')
 
 # ------------------------------------Char dictionary------------------------------------
 
 tf.app.flags.DEFINE_string(
-    'char_map_json_file', './char_map/plate_map.json', 'Path to char map json file')
+    'char_map_json_file', default.char_map_json_file, 'Path to char map json file')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -71,7 +85,7 @@ def _sparse_matrix_to_list(sparse_matrix, char_map_dict=None):
 
     # the last index in sparse_matrix is ctc blanck note
     if char_map_dict is None:
-        char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
+        char_map_dict = json.load(open(config.char_map_json_file, 'r'))
     assert(isinstance(char_map_dict, dict) and 'char_map_dict is not a dict')    
 
     dense_matrix =  len(char_map_dict.keys()) * np.ones(dense_shape, dtype=np.int32)
@@ -87,7 +101,7 @@ def _sparse_matrix_to_list(sparse_matrix, char_map_dict=None):
 
 def _int_to_string(value, char_map_dict=None):
     if char_map_dict is None:
-        char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
+        char_map_dict = json.load(open(config.char_map_json_file, 'r'))
     assert(isinstance(char_map_dict, dict) and 'char_map_dict is not a dict')
     
     for key in char_map_dict.keys():
