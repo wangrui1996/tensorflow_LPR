@@ -91,7 +91,7 @@ default.mom = 0.9
 default.per_batch_size = 1
 default.ckpt = 3
 default.lr_steps = '100000,160000,220000'
-default.models_root = './models'
+default.models_root = './jobs'
 
 def generate_config(_network, _dataset, _loss):
     for k, v in loss[_loss].items():

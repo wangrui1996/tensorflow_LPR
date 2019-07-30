@@ -9,7 +9,7 @@ import argparse
 import numpy as np
 import tensorflow as tf
 
-from crnn_model import cnnmodel as model
+from models import cnnmodel
 from tools.config import config, generate_config, default
 
 def parse_args():
@@ -189,13 +189,8 @@ def _train_crnn_ctc():
     char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
     # initialise the net model
 
-    crnn_net = model.CRNNCTCNetwork(phase='train',
-                                    hidden_num=FLAGS.lstm_hidden_uints,
-                                    layers_num=FLAGS.lstm_hidden_layers,
-                                    num_classes=len(char_map_dict.keys()) + 1)
-
     with tf.variable_scope('CRNN_CTC', reuse=False):
-        net_out = crnn_net.build_network(images=input_images, sequence_length=input_sequence_lengths)
+        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, phase="train")
 
     ctc_loss = tf.reduce_mean(
         tf.nn.ctc_loss(labels=input_labels, inputs=net_out, sequence_length=input_sequence_lengths,
