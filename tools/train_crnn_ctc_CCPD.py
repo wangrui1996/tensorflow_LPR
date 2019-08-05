@@ -10,6 +10,7 @@ import numpy as np
 import tensorflow as tf
 
 from models import cnnmodel
+from models import resmodel
 from tools.config import config, generate_config, default
 
 def parse_args():
@@ -190,7 +191,8 @@ def _train_crnn_ctc():
     # initialise the net model
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
-        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, phase="train")
+        #net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, phase="train")
+        net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, phase="train")
 
     ctc_loss = tf.reduce_mean(
         tf.nn.ctc_loss(labels=input_labels, inputs=net_out, sequence_length=input_sequence_lengths,
