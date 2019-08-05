@@ -39,11 +39,11 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **k
                      normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs ,scope=name + '_conv1')
    #     bn1 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
    #     act1 = Act(data=conv1, act_type=act_type, name=name + '_relu1')
-        conv2 = Conv_unit(data=conv1, num_outputs=int(num_filter*0.25), kernel_size=(3,3), stride=(1,1), pad=(1,1),
+        conv2 = Conv_unit(inputs=conv1, num_outputs=int(num_filter*0.25), kernel_size=(3,3), stride=(1,1), pad=(1,1),
                      normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs ,name=name + '_conv2')
   #      bn2 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
  #       act2 = Act(data=bn2, act_type=act_type, name=name + '_relu2')
-        bn3 = Conv_unit(data=conv2, num_outputs=num_filter, kernel_size=(1,1), stride=(1,1), pad=(0,0),
+        bn3 = Conv_unit(inputs=conv2, num_outputs=num_filter, kernel_size=(1,1), stride=(1,1), pad=(0,0),
                      normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs ,name=name + '_conv3')
   #      bn3 = mx.sym.BatchNorm(data=conv3, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
 
@@ -51,10 +51,10 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **k
           #se begin
           body = tf.reduce_mean(input_tensor=bn3, axis=[1, 2], keep_dims=True, name=name+"_se_pool1")
           #body = mx.sym.Pooling(data=bn3, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
-          body = Conv_unit(data=body, num_outputs=num_filter//16, kernel_size=(1,1), stride=(1,1),
+          body = Conv_unit(inputs=body, num_outputs=num_filter//16, kernel_size=(1,1), stride=(1,1),
                                     name=name+"_se_conv1")
           #body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
-          body = Conv_unit(data=body, num_outputs=num_filter, kernel_size=(1,1), stride=(1,1),
+          body = Conv_unit(inputs=body, num_outputs=num_filter, kernel_size=(1,1), stride=(1,1),
                       activation_fn=tf.nn.sigmoid, name=name+"_se_conv2")
           #body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
           bn3 = bn3 * body
@@ -64,28 +64,28 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **k
         if dim_match:
             shortcut = data
         else:
-            shortcut = Conv_unit(data=data, num_outputs=num_filter, kernel_size=(1,1), stride=stride,
+            shortcut = Conv_unit(inputs=data, num_outputs=num_filter, kernel_size=(1,1), stride=stride,
                                 normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, name=name+'_conv1sc')
             #shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_sc')
      #   if memonger:
      #       shortcut._set_attr(mirror_stage='True')
         return Act(data=bn3 + shortcut, act_type=act_type, name=name + '_relu3')
     else:
-        conv1 = Conv_unit(data=data, num_outputs=num_filter, kernel_size=(3,3), stride=stride, pad=(1,1),
+        conv1 = Conv_unit(inputs=data, num_outputs=num_filter, kernel_size=(3,3), stride=stride, pad=(1,1),
                                       normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, name=name + '_conv1')
         #bn1 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn1')
         #act1 = Act(data=bn1, act_type=act_type, name=name + '_relu1')
-        bn2 = Conv_unit(data=conv1, num_outputs=num_filter, kernel_size=(3,3), stride=(1,1), pad=(1,1),
+        bn2 = Conv_unit(inputs=conv1, num_outputs=num_filter, kernel_size=(3,3), stride=(1,1), pad=(1,1),
                                       normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, name=name + '_conv2')
         #bn2 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn2')
         if use_se:
           #se begin
           body = tf.reduce_mean(input_tensor=bn2, axis=[1, 2], keep_dims=True, name=name + "_se_pool1")
           #body = mx.sym.Pooling(data=bn2, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
-          body = Conv_unit(data=body, num_outputs=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+          body = Conv_unit(inputs=body, num_outputs=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
                                     name=name+"_se_conv1")
           #body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
-          body = Conv_unit(data=body, num_outputs=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+          body = Conv_unit(inputs=body, num_outputs=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
                                     name=name+"_se_conv2")
           #body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
           bn2 = bn2 * body
@@ -95,7 +95,7 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **k
         if dim_match:
             shortcut = data
         else:
-            shortcut = Conv_unit(data=data, num_outputs=num_filter, kernel=(1,1), stride=stride,
+            shortcut = Conv_unit(inputs=data, num_outputs=num_filter, kernel=(1,1), stride=stride,
                                              normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, name=name+'_conv1sc')
             #shortcut = mx.sym.BatchNorm(data=conv1sc, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_sc')
         #if memonger:
@@ -490,7 +490,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
       #data = mx.sym.identity(data=data, name='id')
       data = data-127.5
       data = data*0.0078125
-      body = Conv_unit(data=data, num_outputs=filter_list[0], kernel_size=(3,3), stride=(1,1),
+      body = Conv_unit(inputs=data, num_outputs=filter_list[0], kernel_size=(3,3), stride=(1,1),
                        normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, name="conv0")
       # 64 x 128
       #body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
@@ -503,7 +503,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
       #else:
       #  body = residual_unit(body, filter_list[i+1], (2, 2), False,
       #    name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
-      body = Conv_unit(data=body, num_outputs=filter_list[i+1], kernel_size=filter_kernel[i+1], stride=filter_stride[i+1],
+      body = Conv_unit(inputs=body, num_outputs=filter_list[i+1], kernel_size=filter_kernel[i+1], stride=filter_stride[i+1],
                        normalizer_fn=slim.batch_norm, normalizer_params=bn_kwargs, name="stage%d unit%d" % (i + 1, 1))
       #body = residual_unit(body, filter_list[i+1], (2, 2), False,
       #  name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
@@ -512,7 +512,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
           bottle_neck=bottle_neck, **kwargs)
 
     if bottle_neck:
-      body = Conv_unit(data=body, num_filter=512, kernel_size=(1,1), stride=(1,1),
+      body = Conv_unit(inputs=body, num_filter=512, kernel_size=(1,1), stride=(1,1),
                                 normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, name="convd")
       #body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bnd')
       #body = Act(data=body, act_type=act_type, name='relud')

@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument("--loss", default=default.loss, help="loss config")
     parser.add_argument("--dataset", default=default.dataset, help="dataset")
     args, rest = parser.parse_known_args()
-    #generate_config(args.network, args.dataset, args.loss)
+    generate_config(args.network)
     args = parser.parse_args()
     return args
 
@@ -64,13 +64,6 @@ tf.app.flags.DEFINE_integer(
 
 tf.app.flags.DEFINE_float(
     'decay_rate', default.decay_rate, 'The learning rate decay rate for training.')
-
-# ------------------------------------LSTM prameters------------------------------------
-tf.app.flags.DEFINE_integer(
-    'lstm_hidden_layers', default.lstm_hidden_layers , 'The number of stacked LSTM cell.')
-
-tf.app.flags.DEFINE_integer(
-    'lstm_hidden_uints', default.lstm_hidden_uints, 'The number of units in each LSTM cell')
 
 # ------------------------------------Char dictionary------------------------------------
 

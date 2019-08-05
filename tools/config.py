@@ -48,7 +48,7 @@ network.r50.num_filters_ = 1
 network.r50.kernel_size_ = 2
 network.r50.conv_stride_ = 1
 
-
+network.r50.num_layers = 50
 
 # dataset settings
 dataset = edict()
@@ -81,7 +81,7 @@ default.decay_steps = 10000
 default.decay_rate = 0.8
 
 # default network
-default.network = 'y2'
+default.network = 'r50'
 default.pretrained = ''
 default.pretrained_epoch = 1
 # default dataset
