@@ -148,7 +148,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
       #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
       data = data-127.5
       data = data*0.0078125
-      body = Conv_unit(data=data, num_outputs=filter_list[0], kernel_size=(7, 7), stride=filter_stride[0],
+      body = Conv_unit(inputs=data, num_outputs=filter_list[0], kernel_size=(7, 7), stride=filter_stride[0],
                                 normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs , scope="conv0")
       # 32 x 64
    #   body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
