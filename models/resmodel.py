@@ -144,7 +144,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
     num_unit = len(units)
     assert(num_unit == num_stages)
     last_shape = data.shape
-    print("Input Tensor Shape: ", data.shape, " ======>")
+    print("Input Tensor Shape: ", data.shape)
     # 64 x 128
     if version_input==0:
       #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
@@ -189,7 +189,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
       for j in range(units[i]-1):
         body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
           bottle_neck=bottle_neck, **kwargs)
-      print(" stage  {}: {} ======> {}".format(i, last_shape, " ======> ", body.shape))
+      print(" stage {}: {} ======> {}".format(i, last_shape, body.shape))
       last_shape = body.shape
     if bottle_neck:
       body = Conv_unit(inputs=body, num_filter=512, kernel_size=(1,1), stride=(1,1),
