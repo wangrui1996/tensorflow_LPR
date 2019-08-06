@@ -1,7 +1,7 @@
 model/*
 
 data/*
-
+.idea/*
 tfrecords/*
 
 *.pyc
@@ -10,3 +10,4 @@ tfrecords/*
 
 t
 *.log
+test_data/*

@@ -70,11 +70,11 @@ default.validation_split_fraction = 0.1
 default.shuffle_list = True
 
 default.model_dir = './model/'
-default.num_threads = 8
+default.num_threads = 16
 default.step_per_eval = 500
 default.step_per_test = 3000
 default.step_per_save = 3000
-default.batch_size = 32
+default.batch_size = 128
 default.max_train_steps = 200000
 default.learning_rate = 0.1
 default.decay_steps = 10000
@@ -95,11 +95,11 @@ default.end_epoch = 10000
 default.lr = 0.1
 default.wd = 0.0005
 default.mom = 0.9
-default.per_batch_size = 1
+#default.per_batch_size = 1
 default.ckpt = 3
 default.lr_steps = '100000,160000,220000'
 default.models_root = './jobs'
-default.num_classes = 24
+default.num_classes = 34
 def generate_config(_network):
     for k, v in network[_network].items():
         config[k] = v

@@ -11,6 +11,7 @@ import tensorflow as tf
 
 from models import cnnmodel
 from models import resmodel
+from models import loccnnmodel
 from tools.config import config, generate_config, default
 
 def parse_args():
@@ -185,8 +186,9 @@ def _train_crnn_ctc():
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
         training = tf.placeholder(tf.bool, name='training')
-        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+        #net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
         #net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+        net_out = loccnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
 
     ctc_loss = tf.reduce_mean(
         tf.nn.ctc_loss(labels=input_labels, inputs=net_out, sequence_length=input_sequence_lengths,
@@ -231,7 +233,7 @@ def _train_crnn_ctc():
 
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
+        test_max_acc = -1.0
         for step in range(FLAGS.max_train_steps):
             if (step + 1) % FLAGS.step_per_test == 0 or step == 0:
                 accuracy = []
@@ -263,7 +265,9 @@ def _train_crnn_ctc():
        #             for index, img in enumerate(imgs):
        #                 print('Predict {:s} image with gt label: {:s} <--> predict label: {:s}'.format(str(names[index]), str(lbls[index]), str(preds[index])), flush=True)
                 accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
-                print('Mean test accuracy is {:5f}'.format(accuracy), flush=True)
+                if accuracy > test_max_acc:
+                    test_max_acc = accuracy
+                print('Mean test accuracy is {:5f}, Max test accuracy is: {:5f}'.format(accuracy, test_max_acc), flush=True)
 
 
             imgs, lbls, seq_lens = sess.run([train_batch_images, train_batch_labels, train_batch_sequence_lengths])
