@@ -184,8 +184,9 @@ def _train_crnn_ctc():
     # initialise the net model
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
+        training = tf.placeholder(tf.bool, name='training')
         #net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, phase="train")
-        net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, phase="train")
+        net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
 
     ctc_loss = tf.reduce_mean(
         tf.nn.ctc_loss(labels=input_labels, inputs=net_out, sequence_length=input_sequence_lengths,
@@ -236,7 +237,7 @@ def _train_crnn_ctc():
                 accuracy = []
                 for _ in range(step_nums):
                     imgs, lbls, seq_lens, names = sess.run([test_batch_images, test_batch_labels, test_batch_sequence_lengths, test_batch_imagenames])
-                    preds = sess.run(ctc_decoded, feed_dict={input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens})
+                    preds = sess.run(ctc_decoded, feed_dict={input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens, training:False})
                     preds = _sparse_matrix_to_list(preds[0], char_map_dict)
                     lbls = _sparse_matrix_to_list(lbls, char_map_dict)
                     #print(preds)
@@ -269,7 +270,7 @@ def _train_crnn_ctc():
 
             _, cl, lr, sd, preds, summary = sess.run(
                 [optimizer, ctc_loss, learning_rate, sequence_distance, ctc_decoded, merge_summary_op],
-                feed_dict = {input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens})
+                feed_dict = {input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens, training:True})
 
             if (step + 1) % FLAGS.step_per_save == 0: 
                 summary_writer.add_summary(summary=summary, global_step=step)

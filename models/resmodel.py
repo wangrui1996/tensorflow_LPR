@@ -40,7 +40,7 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **k
    #     bn1 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
    #     act1 = Act(data=conv1, act_type=act_type, name=name + '_relu1')
         conv2 = Conv_unit(inputs=conv1, num_outputs=int(num_filter*0.25), kernel_size=(3,3), stride=(1,1), pad=(1,1),
-                     normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs ,name=name + '_conv2')
+                     normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs ,scope=name + '_conv2')
   #      bn2 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
  #       act2 = Act(data=bn2, act_type=act_type, name=name + '_relu2')
         bn3 = Conv_unit(inputs=conv2, num_outputs=num_filter, kernel_size=(1,1), stride=(1,1), pad=(0,0),
@@ -71,21 +71,21 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **k
      #       shortcut._set_attr(mirror_stage='True')
         return Act(data=bn3 + shortcut, act_type=act_type, name=name + '_relu3')
     else:
-        conv1 = Conv_unit(inputs=data, num_outputs=num_filter, kernel_size=(3,3), stride=stride, pad=(1,1),
+        conv1 = Conv_unit(inputs=data, num_outputs=num_filter, kernel_size=(3,3), stride=stride,
                                       normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs,  scope=name + '_conv1')
         #bn1 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn1')
         #act1 = Act(data=bn1, act_type=act_type, name=name + '_relu1')
-        bn2 = Conv_unit(inputs=conv1, num_outputs=num_filter, kernel_size=(3,3), stride=(1,1), pad=(1,1),
+        bn2 = Conv_unit(inputs=conv1, num_outputs=num_filter, kernel_size=(3,3), stride=(1,1),
                                       normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, scope=name + '_conv2')
         #bn2 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, momentum=bn_mom, eps=2e-5, name=name + '_bn2')
         if use_se:
           #se begin
           body = tf.reduce_mean(input_tensor=bn2, axis=[1, 2], keep_dims=True, name=name + "_se_pool1")
           #body = mx.sym.Pooling(data=bn2, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
-          body = Conv_unit(inputs=body, num_outputs=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+          body = Conv_unit(inputs=body, num_outputs=num_filter//16, kernel=(1,1), stride=(1,1),
                                     scope=name+"_se_conv1")
           #body = Act(data=body, act_type=act_type, name=name+'_se_relu1')
-          body = Conv_unit(inputs=body, num_outputs=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+          body = Conv_unit(inputs=body, num_outputs=num_filter, kernel=(1,1), stride=(1,1),
                                     scope=name+"_se_conv2")
           #body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
           bn2 = bn2 * body
@@ -117,7 +117,7 @@ def residual_unit(data, num_filter, stride, dim_match, name, bottle_neck, **kwar
   else:
     return 0
 
-def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, bottle_neck):
+def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, bottle_neck, training):
     bn_mom = config.bn_mom
     kwargs = {'version_se' : config.net_se,
         'version_input': config.net_input,
@@ -130,7 +130,8 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
         "center": True,
         "scale": True,
         "epsilon": 2e-5,
-        "renorm_decay": bn_mom
+        "renorm_decay": bn_mom,
+        "is_training": training
     }
     version_se = kwargs.get('version_se', 1)
     version_input = kwargs.get('version_input', 0)
@@ -193,10 +194,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
     #fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
     return body
 
-def build_network(images, num_classes=default.num_classes, phase="test"):
-    # first apply the cnn feature extraction stage
-    is_training = True if phase == 'train' else False
-
+def build_network(images, num_classes=default.num_classes, training=None):
     num_layers = config.num_layers
     filter_kernel = [(2,2), (2,2), (2,1), (2,1), (2,1)]
     filter_stride = [(2,2), (2,2), (2,1), (2,1), (2,1)]
@@ -253,7 +251,8 @@ def build_network(images, num_classes=default.num_classes, phase="test"):
         filter_list=filter_list,
         filter_kernel=filter_kernel,
         filter_stride=filter_stride,
-        bottle_neck=bottle_neck)
+        bottle_neck=bottle_neck,
+        training=training)
   #  with slim.arg_scope([slim.conv2d],
    #                     weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
    #                     weights_regularizer=slim.l2_regularizer(0.0005),
