@@ -28,11 +28,13 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **k
     use_se = kwargs.get('version_se', 1)
     bn_mom = kwargs.get('bn_mom', 0.9)
     act_type = kwargs.get('version_act', 'prelu')
+    is_training = kwargs.get("is_training", False)
     bn_kwargs = {
         "center":True,
         "scale":True,
         "epsilon": 2e-5,
-        "renorm_decay": bn_mom
+        "renorm_decay": bn_mom,
+        "is_training": is_training
     }
     if bottle_neck:
         conv1 = Conv_unit(inputs=data, num_outputs=int(num_filter*0.25), kernel_size=(1,1), stride=stride, pad=(0,0),
@@ -125,6 +127,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
         'version_unit': config.net_unit,
         'version_act': config.net_act,
         'bn_mom': bn_mom,
+        "is_training": training
         }
     bn_kwargs = {
         "center": True,
