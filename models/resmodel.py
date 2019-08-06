@@ -151,8 +151,6 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
     # 64 x 128
     if version_input==0:
       #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
-      data = data-127.5
-      data = data*0.0078125
       body = Conv_unit(inputs=data, num_outputs=filter_list[0], kernel_size=(7, 7), stride=filter_stride[0],
                                 normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs , scope="conv0")
       # 32 x 64
@@ -168,8 +166,6 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
    #   body = Act(data=body, act_type=act_type, name='relu0')
     else:
       #data = mx.sym.identity(data=data, name='id')
-      data = data-127.5
-      data = data*0.0078125
       body = Conv_unit(inputs=data, num_outputs=filter_list[0], kernel_size=(3,3), stride=(1,1),
                        normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, scope="conv0")
       # 64 x 128
@@ -211,8 +207,8 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
 
 def build_network(images, num_classes=default.num_classes, training=None):
     num_layers = config.num_layers
-    filter_kernel = [(2,2), (2,2), (2,1), (2,1), (2,1)]
-    filter_stride = [(2,2), (2,2), (2,1), (2,1), (2,1)]
+    filter_kernel = [(2,2), (2,2), 2, (2,1), (2,1)]
+    filter_stride = [(2,2), (2,2), 2, (2,1), (2,1)]
     if num_layers >= 500:
         filter_list = [64, 256, 512, 1024, 2048]
         bottle_neck = True
