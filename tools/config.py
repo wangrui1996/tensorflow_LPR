@@ -49,7 +49,7 @@ network.r50.kernel_size_ = 2
 network.r50.conv_stride_ = 1
 network.r50.net_unit = 1
 network.r50.num_layers = 50
-network.r50.net_unit = 0
+network.r50.net_input = 0
 # dataset settings
 dataset = edict()
 
