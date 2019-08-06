@@ -185,8 +185,8 @@ def _train_crnn_ctc():
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
         training = tf.placeholder(tf.bool, name='training')
-        #net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, phase="train")
-        net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+        #net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
 
     ctc_loss = tf.reduce_mean(
         tf.nn.ctc_loss(labels=input_labels, inputs=net_out, sequence_length=input_sequence_lengths,

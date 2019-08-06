@@ -9,9 +9,8 @@ from tools.config import config, default
 _BATCH_DECAY = 0.999
 
 
-def build_network(images, num_classes=default.num_classes, phase="test"):
+def build_network(images, num_classes=default.num_classes, training=None):
     # first apply the cnn feature extraction stage
-    is_training = True if phase == 'train' else False
     with slim.arg_scope([slim.conv2d],
                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                         weights_regularizer=slim.l2_regularizer(0.0005),
@@ -26,9 +25,9 @@ def build_network(images, num_classes=default.num_classes, phase="test"):
         net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool3')
         # 8 x 32
         net = slim.conv2d(net, 256, kernel_size=3, stride=1, scope='conv4')
-        net = slim.batch_norm(net, decay=_BATCH_DECAY, is_training=is_training, scope='bn4')
+        net = slim.batch_norm(net, decay=_BATCH_DECAY, is_training=training, scope='bn4')
         net = slim.conv2d(net, 256, kernel_size=3, stride=1, scope='conv5')
-        net = slim.batch_norm(net, decay=_BATCH_DECAY, is_training=is_training, scope='bn5')
+        net = slim.batch_norm(net, decay=_BATCH_DECAY, is_training=training, scope='bn5')
         net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool5')
         # 4 x 32
         net = slim.conv2d(net, 256, padding="VALID", kernel_size=2, stride=2, scope='conv6')
