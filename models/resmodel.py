@@ -200,9 +200,10 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
     #fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
     body_height = body.shape[1]
     if body_height != 1:
+        print("add Conv_unit")
         body = Conv_unit(inputs=body, num_outputs=512, kernel_size=(body_height,1), stride=(1,1),
                                 normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, scope="convout")
-    print(" stage output shape: {} ======> {}".format(last_shape, " ======> ", body.shape))
+    print(" stage output shape: {} ======> {}".format(last_shape, body.shape))
     return body
 
 def build_network(images, num_classes=default.num_classes, training=None):
