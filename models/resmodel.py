@@ -139,10 +139,12 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
     version_output = kwargs.get('version_output', 'E')
     version_unit = kwargs.get('version_unit', 3)
     act_type = kwargs.get('version_act', 'prelu')
-    print(version_se, version_input, version_output, version_unit, act_type)
+    print("version_se: ", version_se, " version_input: ",version_input, " version_output: ",
+          version_output, "version_unit: ", version_unit, " act_type: ", act_type)
     num_unit = len(units)
     assert(num_unit == num_stages)
-    print("data shape: ", data.shape)
+    last_shape = data.shape
+    print("Input Tensor Shape: ", data.shape, " ======>")
     # 64 x 128
     if version_input==0:
       #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
@@ -171,6 +173,8 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
       #body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
       #body = Act(data=body, act_type=act_type, name='relu0')
 
+    print(" stage pre: ", last_shape, " ======> ", body.shape)
+    last_shape = body.shape
     for i in range(num_stages):
       #if version_input==0:
       #  body = residual_unit(body, filter_list[i+1], (1 if i==0 else 2, 1 if i==0 else 2), False,
@@ -185,7 +189,8 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
       for j in range(units[i]-1):
         body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
           bottle_neck=bottle_neck, **kwargs)
-
+      print(" stage  {}: {} ======> {}".format(i, last_shape, " ======> ", body.shape))
+      last_shape = body.shape
     if bottle_neck:
       body = Conv_unit(inputs=body, num_filter=512, kernel_size=(1,1), stride=(1,1),
                                 normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, scope="convd")
@@ -193,6 +198,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
       #body = Act(data=body, act_type=act_type, name='relud')
 
     #fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
+    print(" stage output shape: {} ======> {}".format(last_shape, " ======> ", body.shape))
     return body
 
 def build_network(images, num_classes=default.num_classes, training=None):
