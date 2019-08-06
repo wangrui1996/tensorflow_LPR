@@ -142,6 +142,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
     print(version_se, version_input, version_output, version_unit, act_type)
     num_unit = len(units)
     assert(num_unit == num_stages)
+    print("data shape: ", data.shape)
     # 64 x 128
     if version_input==0:
       #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
