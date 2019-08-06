@@ -201,7 +201,7 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
     body_height = body.shape[1]
     if body_height != 1:
         print("add Conv_unit")
-        body = Conv_unit(inputs=body, num_outputs=512, kernel_size=(body_height,1), stride=(1,1),
+        body = Conv_unit(inputs=body, num_outputs=512, kernel_size=(body_height,1), stride=(1,1),padding="VALID",
                                 normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, scope="convout")
     print(" stage output shape: {} ======> {}".format(last_shape, body.shape))
     return body
