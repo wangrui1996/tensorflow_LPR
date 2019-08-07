@@ -79,7 +79,7 @@ default.max_train_steps = 200000
 default.learning_rate = 0.1
 default.decay_steps = 10000
 default.decay_rate = 0.8
-
+default.log = "./info.log"
 # default network
 default.network = 'r50'
 default.pretrained = ''

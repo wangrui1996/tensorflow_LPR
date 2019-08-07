@@ -41,7 +41,7 @@ def build_network(images, num_classes=default.num_classes, training=None):
         # 2 x 4
         loc_net = slim.conv2d(loc_net, 16, kernel_size=3, stride=1, scope='loc_conv5')
         loc_net = tf.reduce_mean(input_tensor=loc_net, axis=[1, 2], keep_dims=False, name="loc_se_pool1")
-        loc_net = tf.reshape(loc_net, [0, -1])
+        loc_net = tf.reshape(loc_net, [loc_net.shape[0], -1])
         loc_B, loc_W = loc_net.shape
         W_fc1 = tf.Variable(tf.zeros([loc_W, n_fc]), name='W_fc1')
         b_fc1 = tf.Variable(initial_value=initial, name='b_fc1')
