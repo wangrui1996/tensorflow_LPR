@@ -8,8 +8,6 @@ import json
 import argparse
 import numpy as np
 import tensorflow as tf
-from src import rlog as log
-log.setLevel('INFO')
 # 默认的显示等级，显示所有信息
 #os.environ["TF_CPP_MIN_LOG_LEVEL"] = '1'
 
@@ -129,9 +127,9 @@ def _read_train_tfrecord(tfrecord_path, num_epochs=None):
                                            'labels': tf.VarLenFeature(tf.int64),
                                            'imagenames': tf.FixedLenFeature([], tf.string),
                                        })
-    max_delta = 50
-    contrast_lower = 0.5
-    contrast_upper = 1.5
+    max_delta = 20
+    contrast_lower = 0.8
+    contrast_upper = 1.2
     images = tf.image.decode_jpeg(features['images'])
     tf.image.random_contrast(images, contrast_lower, contrast_upper, seed=None)
     images = tf.image.random_brightness(images, max_delta, seed=None)
@@ -235,7 +233,6 @@ def _train_crnn_ctc():
     sess_config = tf.ConfigProto()
     sess_config.gpu_options.allow_growth = True
     with tf.Session(config=sess_config) as sess:
-        saver.restore(sess,tf.train.latest_checkpoint(FLAGS.model_dir))
         summary_writer = tf.summary.FileWriter(FLAGS.model_dir)
         summary_writer.add_graph(sess.graph)
 
@@ -278,7 +275,7 @@ def _train_crnn_ctc():
                 accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
                 if accuracy > test_max_acc:
                     test_max_acc = accuracy
-                log.info('Mean test accuracy is {:5f}, Max test accuracy is: {:5f}'.format(accuracy, test_max_acc))
+                print('Mean test accuracy is {:5f}, Max test accuracy is: {:5f}'.format(accuracy, test_max_acc), flush=True)
 
 
             imgs, lbls, seq_lens = sess.run([train_batch_images, train_batch_labels, train_batch_sequence_lengths])
@@ -318,8 +315,8 @@ def _train_crnn_ctc():
                                 accuracy.append(0)
                 accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
 
-                log.info('step:{:d} learning_rate={:9f} ctc_loss={:9f} sequence_distance={:9f} train_accuracy={:9f}'.format(
-                    step + 1, lr, cl, sd, accuracy))
+                print('step:{:d} learning_rate={:9f} ctc_loss={:9f} sequence_distance={:9f} train_accuracy={:9f}'.format(
+                    step + 1, lr, cl, sd, accuracy), flush=True)
 
             
         # close tensorboard writer
