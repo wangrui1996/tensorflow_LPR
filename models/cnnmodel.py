@@ -10,6 +10,7 @@ _BATCH_DECAY = 0.999
 
 
 def build_network(images, num_classes=default.num_classes, training=None):
+    tf.logging.info("Loading CNN Model")
     # first apply the cnn feature extraction stage
     with slim.arg_scope([slim.conv2d],
                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),

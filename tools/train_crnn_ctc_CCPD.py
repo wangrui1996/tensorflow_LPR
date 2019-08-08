@@ -8,14 +8,9 @@ import json
 import argparse
 import numpy as np
 import tensorflow as tf
-# 默认的显示等级，显示所有信息
-#os.environ["TF_CPP_MIN_LOG_LEVEL"] = '1'
 
-# 只显示 warning 和 Error
-#os.environ["TF_CPP_MIN_LOG_LEVEL"] = '2'
-
-# 只显示 Error
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = '3'
+# set log level
+tf.logging.set_verbosity(tf.logging.INFO)
 
 from models import cnnmodel
 from models import resmodel
@@ -242,6 +237,12 @@ def _train_crnn_ctc():
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         test_max_acc = -1.0
+        tf.logging.info("+++++++++++++++++++ Start to train +++++++++++++++++++++++")
+        tf.logging.info("Top of {} train steps".format(FLAGS.max_train_steps))
+        tf.logging.info("{} step per test".format(FLAGS.step_per_test))
+        tf.logging.info("{} step per eval".format(FLAGS.step_per_eval))
+        tf.logging.info("{} step per save".format(FLAGS.step_per_save))
+        tf.logging.info("----------------------------------------------------------")
         for step in range(FLAGS.max_train_steps):
             if (step + 1) % FLAGS.step_per_test == 0 or step == 0:
                 accuracy = []
@@ -275,7 +276,7 @@ def _train_crnn_ctc():
                 accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
                 if accuracy > test_max_acc:
                     test_max_acc = accuracy
-                print('Mean test accuracy is {:5f}, Max test accuracy is: {:5f}'.format(accuracy, test_max_acc), flush=True)
+                tf.logging.info('Mean test accuracy is {:5f}, Max test accuracy is: {:5f}'.format(accuracy, test_max_acc))
 
 
             imgs, lbls, seq_lens = sess.run([train_batch_images, train_batch_labels, train_batch_sequence_lengths])
@@ -315,8 +316,8 @@ def _train_crnn_ctc():
                                 accuracy.append(0)
                 accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
 
-                print('step:{:d} learning_rate={:9f} ctc_loss={:9f} sequence_distance={:9f} train_accuracy={:9f}'.format(
-                    step + 1, lr, cl, sd, accuracy), flush=True)
+                tf.logging.info('step:{:d} learning_rate={:9f} ctc_loss={:9f} sequence_distance={:9f} train_accuracy={:9f}'.format(
+                    step + 1, lr, cl, sd, accuracy))
 
             
         # close tensorboard writer
