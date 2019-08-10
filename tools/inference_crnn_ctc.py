@@ -10,12 +10,13 @@ import tensorflow as tf
 
 import cv2
 import numpy as np
-
-from crnn_model import model
+from models import cnnmodel
+from models import resmodel
+from models import loccnnmodel
 
 os.environ["CUDA_VISIBLE_DEVICES"]=""
 
-_IMAGE_HEIGHT = 32
+_IMAGE_HEIGHT = 64
 _IMAGE_WIDTH = 128
 
 # ------------------------------------Basic prameters------------------------------------
@@ -28,16 +29,9 @@ tf.app.flags.DEFINE_string(
 tf.app.flags.DEFINE_string(
     'model_dir', './model/', 'Base directory for the model.')
 
-# ------------------------------------LSTM prameters------------------------------------
-tf.app.flags.DEFINE_integer(
-    'lstm_hidden_layers', 2, 'The number of stacked LSTM cell.')
-
-tf.app.flags.DEFINE_integer(
-    'lstm_hidden_uints', 256, 'The number of units in each LSTM cell')
-
 # ------------------------------------Char dictionary------------------------------------
 tf.app.flags.DEFINE_string(
-    'char_map_json_file', './char_map/char_map.json', 'Path to char map json file')
+    'char_map_json_file', './char_map/plate_map.json', 'Path to char map json file')
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -75,44 +69,45 @@ def _int_to_string(value, char_map_dict=None):
     raise ValueError('char map dict not has {:d} value. convert index to char failed.'.format(value))
 
 def _inference_crnn_ctc():
-    input_image = tf.placeholder(dtype=tf.float32, shape=[1, _IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
+    input_images = tf.placeholder(dtype=tf.float32, shape=[1, _IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
     char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
     # initialise the net model
-    crnn_net = model.CRNNCTCNetwork(phase='test',
-                                    hidden_num=FLAGS.lstm_hidden_uints,
-                                    layers_num=FLAGS.lstm_hidden_layers,
-                                    num_classes=len(char_map_dict.keys()) + 1)
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
-        net_out = crnn_net.build_network(input_image)
+        training = tf.placeholder(tf.bool, name='training')
+        net_out = loccnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
 
     input_sequence_length = tf.placeholder(tf.int32, shape=[1], name='input_sequence_length')
 
     ctc_decoded, ct_log_prob = tf.nn.ctc_beam_search_decoder(net_out, input_sequence_length, merge_repeated=False)
 
+    init_op = tf.global_variables_initializer()
     with open(FLAGS.image_list, 'r') as fd:
        image_names = [line.strip() for line in fd.readlines()]
 
     # set checkpoint saver
-    saver = tf.train.Saver()
     save_path = tf.train.latest_checkpoint(FLAGS.model_dir)
-
+    variables_to_restore = tf.contrib.framework.get_variables_to_restore(exclude=['CRNN_CTC/locnet'])
+    init_fn = tf.contrib.framework.assign_from_checkpoint_fn(save_path, variables_to_restore)
     with tf.Session() as sess:
+        sess.run(init_op)
         # restore all variables
-        saver.restore(sess=sess, save_path=save_path)
+        #saver.restore(sess=sess, save_path=save_path)
+        try:
+            init_fn(sess)
+        except:
+            print("can not find model weight")
 
         for image_name in image_names:
             image_path = os.path.join(FLAGS.image_dir, image_name)
             image = cv2.imread(image_path)
-            h, w, c = image.shape
-            height = _IMAGE_HEIGHT
-            width = int(w * height / h)
-            image = cv2.resize(image, (width, height))
+            image = cv2.resize(image, (_IMAGE_WIDTH, _IMAGE_HEIGHT))
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image = np.expand_dims(image, axis=0)
             image = np.array(image, dtype=np.float32)
-            seq_len = np.array([width / 8], dtype=np.int32)
+            seq_len = np.array([_IMAGE_WIDTH / 8], dtype=np.int32)
 
-            preds = sess.run(ctc_decoded, feed_dict={input_image:image, input_sequence_length:seq_len})
+            preds = sess.run(ctc_decoded, feed_dict={input_images:image, input_sequence_length:seq_len, training:False})
  
             preds = _sparse_matrix_to_list(preds[0], char_map_dict)
 

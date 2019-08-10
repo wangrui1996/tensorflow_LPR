@@ -10,17 +10,19 @@ import tensorflow as tf
 
 import numpy as np
 
-from crnn_model import model
+from models import cnnmodel
+from models import resmodel
+from models import loccnnmodel
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
-_IMAGE_HEIGHT = 32
+_IMAGE_HEIGHT = 64
 _IMAGE_WIDTH = 128
 # ------------------------------------Basic prameters------------------------------------
 tf.app.flags.DEFINE_string(
-    'data_dir', './tfrecords/', 'Path to the directory containing data tf record.')
+    'data_dir', './data/', 'Path to the directory containing data tf record.')
 
 tf.app.flags.DEFINE_string(
-    'model_dir', './models/', 'Base directory for the model.')
+    'model_dir', './model/', 'Base directory for the model.')
 
 tf.app.flags.DEFINE_integer(
     'num_threads', 4, 'The number of threads to use in batch shuffling') 
@@ -89,6 +91,7 @@ def _read_tfrecord(tfrecord_path, num_epochs=None):
                                            'imagenames': tf.FixedLenFeature([], tf.string),
                                        })
     images = tf.image.decode_jpeg(features['images'])
+    images = tf.image.resize_images(images,(_IMAGE_HEIGHT,_IMAGE_WIDTH))
     images.set_shape([_IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
     images = tf.cast(images, tf.float32)
     labels = tf.cast(features['labels'], tf.int32)
@@ -111,13 +114,10 @@ def _eval_crnn_ctc():
 
     char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
     # initialise the net model
-    crnn_net = model.CRNNCTCNetwork(phase='test',
-                                    hidden_num=FLAGS.lstm_hidden_uints,
-                                    layers_num=FLAGS.lstm_hidden_layers,
-                                    num_classes=len(char_map_dict.keys()) + 1)
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
-        net_out = crnn_net.build_network(images=input_images, sequence_length=input_sequence_lengths)
+        training = tf.placeholder(tf.bool, name='training')
+        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
 
     ctc_decoded, ct_log_prob = tf.nn.ctc_beam_search_decoder(net_out, input_sequence_lengths, merge_repeated=False)
 
@@ -143,7 +143,7 @@ def _eval_crnn_ctc():
 
         for _ in range(step_nums):
             imgs, lbls, seq_lens, names = sess.run([batch_images, batch_labels, batch_sequence_lengths, batch_imagenames])
-            preds = sess.run(ctc_decoded, feed_dict={input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens})
+            preds = sess.run(ctc_decoded, feed_dict={input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens, training:False})
 
             preds = _sparse_matrix_to_list(preds[0], char_map_dict)
             lbls = _sparse_matrix_to_list(lbls, char_map_dict)

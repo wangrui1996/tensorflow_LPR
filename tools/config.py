@@ -70,6 +70,7 @@ default.validation_split_fraction = 0.1
 default.shuffle_list = True
 
 default.model_dir = './model/'
+default.model_save_path = "./jobs/"
 default.num_threads = 16
 default.step_per_eval = 500
 default.step_per_test = 3000

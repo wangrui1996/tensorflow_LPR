@@ -41,6 +41,9 @@ tf.app.flags.DEFINE_string(
 tf.app.flags.DEFINE_string(
     'model_dir', default.model_dir, 'Base directory for the model.')
 
+tf.app.flags.DEFINE_string(
+    'model_save_path', default.model_save_path, 'Base directory for the model.')
+
 tf.app.flags.DEFINE_integer(
     'num_threads', default.num_threads, 'The number of threads to use in batch shuffling')
 
@@ -219,11 +222,14 @@ def _train_crnn_ctc():
 
     # set checkpoint saver
     saver = tf.train.Saver()
+    restore_path = tf.train.latest_checkpoint(FLAGS.model_dir)
+    variables_to_restore = tf.contrib.framework.get_variables_to_restore(exclude=['CRNN_CTC/locnet'])
+    init_fn = tf.contrib.framework.assign_from_checkpoint_fn(restore_path, variables_to_restore)
     if not os.path.exists(FLAGS.model_dir):
         os.makedirs(FLAGS.model_dir)
     train_start_time = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
     model_name = 'crnn_ctc_ocr_{:s}.ckpt'.format(str(train_start_time))
-    model_save_path = os.path.join(FLAGS.model_dir, model_name)  
+    model_save_path = os.path.join(FLAGS.model_save_path, model_name)
 
     sess_config = tf.ConfigProto()
     sess_config.gpu_options.allow_growth = True
@@ -233,6 +239,7 @@ def _train_crnn_ctc():
 
         # init all variables
         sess.run(init_op)
+        init_fn(sess)
 
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
