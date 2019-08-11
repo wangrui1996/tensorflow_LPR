@@ -32,9 +32,9 @@ config.memonger = False #not work now
 
 # network settings
 network = edict()
-
 network.y2 = edict()
 network.y2.net_name = 'fmobilefacenet'
+network.y2.batch_size = 128
 network.y2.emb_size = 256
 network.y2.net_output = 'GDC'
 network.y2.net_output = 'E'
@@ -42,6 +42,7 @@ network.y2.net_blocks = [2,8,16,4]
 
 network.r50 = edict()
 network.r50.net_name = 'resnet'
+network.r50.batch_size = 128
 network.r50.resnet_size = 1
 network.r50.bottleneck=1
 network.r50.num_filters_ = 1
@@ -50,6 +51,12 @@ network.r50.conv_stride_ = 1
 network.r50.net_unit = 1
 network.r50.num_layers = 50
 network.r50.net_input = 0
+
+network.cnn = edict()
+network.cnn.net_name = "cnnnet"
+network.cnn.batch_size = 128
+network.cnn.stn = False
+
 # dataset settings
 dataset = edict()
 
@@ -69,13 +76,15 @@ default.data_dir = './data/'
 default.validation_split_fraction = 0.1
 default.shuffle_list = True
 
-default.model_dir = './model/'
-default.model_save_path = "./jobs/"
+default.save_root_path = "./jobs/"
+default.model_save_path = os.path.join(default.save_root_path, "models")
+default.model_stn_save_path = os.path.join(default.save_root_path, "stnmodels")
+
 default.num_threads = 16
 default.step_per_eval = 500
 default.step_per_test = 3000
 default.step_per_save = 3000
-default.batch_size = 128
+
 default.max_train_steps = 200000
 default.learning_rate = 0.1
 default.decay_steps = 10000
@@ -101,6 +110,7 @@ default.ckpt = 3
 default.lr_steps = '100000,160000,220000'
 default.models_root = './jobs'
 default.num_classes = 34
+default.tfrecord_path = "./data/"
 def generate_config(_network):
     for k, v in network[_network].items():
         config[k] = v

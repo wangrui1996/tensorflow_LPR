@@ -3,16 +3,13 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import time
 import json
 
 import tensorflow as tf
 
 import cv2
 import numpy as np
-from models import cnnmodel
-from models import resmodel
-from models import loccnnmodel
+from src.models import loccnnmodel
 
 os.environ["CUDA_VISIBLE_DEVICES"]=""
 
@@ -75,7 +72,7 @@ def _inference_crnn_ctc():
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
         training = tf.placeholder(tf.bool, name='training')
-        net_out = loccnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+        net_out = loccnnmodel.build_network(input_images, len(char_map_dict.keys()) + 1, training)
 
     input_sequence_length = tf.placeholder(tf.int32, shape=[1], name='input_sequence_length')
 

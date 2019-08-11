@@ -3,15 +3,14 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from tensorflow.contrib import rnn
-from models.stn.transformer import spatial_transformer_network
+from src.stn.transformer import spatial_transformer_network
 from tensorflow.contrib import slim
 import numpy as np
-from tools.config import config, default
+from tools.config import default
 _BATCH_DECAY = 0.999
 
 
-def build_network(images, num_classes=default.num_classes, training=None):
+def build_network(images, num_classes=default.num_classes, training=None, pool=False):
     # locnet
     with slim.arg_scope([slim.conv2d],
                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),

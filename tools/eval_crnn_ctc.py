@@ -3,16 +3,13 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-import time
 import json
 
 import tensorflow as tf
 
 import numpy as np
 
-from models import cnnmodel
-from models import resmodel
-from models import loccnnmodel
+from src.models import cnnmodel
 
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 _IMAGE_HEIGHT = 64
@@ -117,7 +114,7 @@ def _eval_crnn_ctc():
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
         training = tf.placeholder(tf.bool, name='training')
-        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+        net_out = cnnmodel.build_network(input_images, len(char_map_dict.keys()) + 1, training)
 
     ctc_decoded, ct_log_prob = tf.nn.ctc_beam_search_decoder(net_out, input_sequence_lengths, merge_repeated=False)
 
