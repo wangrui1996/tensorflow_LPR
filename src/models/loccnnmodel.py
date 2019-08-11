@@ -6,11 +6,11 @@ import tensorflow as tf
 from src.stn.transformer import spatial_transformer_network
 from tensorflow.contrib import slim
 import numpy as np
-from tools.config import default
+from tools.config import default, config
 _BATCH_DECAY = 0.999
 
 
-def build_network(images, num_classes=default.num_classes, training=None, pool=False):
+def build_network(images, num_classes=default.num_classes, training=None, pool=config.pool):
     # locnet
     with slim.arg_scope([slim.conv2d],
                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),

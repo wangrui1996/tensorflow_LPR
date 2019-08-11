@@ -14,6 +14,7 @@ def build_network(images, num_classes=default.num_classes, training=None, stn=Fa
     tf.logging.info("Loading CNN Model")
 
     if stn:
+        tf.logging.info("Start to loading stn network")
         # locnet
         with slim.arg_scope([slim.conv2d],
                             weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
@@ -50,6 +51,7 @@ def build_network(images, num_classes=default.num_classes, training=None, stn=Fa
                 loc_net = tf.matmul(loc_net, W_fc1) + b_fc1
                 loc_output = spatial_transformer_network(images, loc_net)
                 images = loc_output
+                tf.logging.info("stn network loaded...")
 
         # 1 x 2
 
@@ -58,6 +60,7 @@ def build_network(images, num_classes=default.num_classes, training=None, stn=Fa
                         weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
                         weights_regularizer=slim.l2_regularizer(0.0005),
                         biases_initializer=None):
+        tf.logging.info("Start to loading cnn feature extraction network")
         net = slim.repeat(images, 2, slim.conv2d, 32, kernel_size=3, stride=1, scope='conv1')
         net = slim.max_pool2d(net, kernel_size=2, stride=2, scope='pool1')
         # 32 x 64
@@ -77,6 +80,7 @@ def build_network(images, num_classes=default.num_classes, training=None, stn=Fa
         # 2 x 32
         cnn_out = slim.conv2d(net, 512, padding="VALID", kernel_size=[2, 1], stride=1, scope='conv7')
         # 1 x 32
+        tf.logging.info("feature network loaded")
     # second apply the map to sequence stage
     shape = cnn_out.get_shape().as_list()
     assert shape[1] == 1

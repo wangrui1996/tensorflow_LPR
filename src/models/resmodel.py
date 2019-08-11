@@ -175,26 +175,30 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
     print(" stage pre: ", last_shape, " ======> ", body.shape)
     last_shape = body.shape
     for i in range(num_stages):
-      #if version_input==0:
-      #  body = residual_unit(body, filter_list[i+1], (1 if i==0 else 2, 1 if i==0 else 2), False,
-      #                       name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
-      #else:
-      #  body = residual_unit(body, filter_list[i+1], (2, 2), False,
-      #    name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
-      body = Conv_unit(inputs=body, num_outputs=filter_list[i+1], kernel_size=filter_kernel[i+1], stride=filter_stride[i+1],
+        #if version_input==0:
+        #  body = residual_unit(body, filter_list[i+1], (1 if i==0 else 2, 1 if i==0 else 2), False,
+        #                       name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
+        #else:
+        #  body = residual_unit(body, filter_list[i+1], (2, 2), False,
+        #    name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
+        current_stride = filter_stride[i+1]
+        if current_stride > 1 and config.pool:
+            body = slim.max_pool2d(body, kernel_size=filter_kernel[i+1], stride=filter_stride[i+1], padding='SAME', scope='pool3')
+        else:
+            body = Conv_unit(inputs=body, num_outputs=filter_list[i+1], kernel_size=filter_kernel[i+1], stride=filter_stride[i+1],
                        normalizer_fn=slim.batch_norm, normalizer_params=bn_kwargs, scope="stage%d_unit%d" % (i + 1, 1))
-      #body = residual_unit(body, filter_list[i+1], (2, 2), False,
-      #  name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
-      for j in range(units[i]-1):
-        body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
-          bottle_neck=bottle_neck, **kwargs)
-      print(" stage {}: {} ======> {}".format(i, last_shape, body.shape))
-      last_shape = body.shape
+        #body = residual_unit(body, filter_list[i+1], (2, 2), False,
+        #  name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
+        for j in range(units[i]-1):
+            body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
+                 bottle_neck=bottle_neck, **kwargs)
+        print(" stage {}: {} ======> {}".format(i, last_shape, body.shape))
+        last_shape = body.shape
     if bottle_neck:
-      body = Conv_unit(inputs=body, num_outputs=512, kernel_size=(1,1), stride=(1,1),
+        body = Conv_unit(inputs=body, num_outputs=512, kernel_size=(1,1), stride=(1,1),
                                 normalizer_fn = slim.batch_norm, normalizer_params=bn_kwargs, scope="convd")
-      #body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bnd')
-      #body = Act(data=body, act_type=act_type, name='relud')
+        #body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bnd')
+        #body = Act(data=body, act_type=act_type, name='relud')
 
     #fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
     body_height = body.shape[1]
