@@ -145,7 +145,7 @@ def train_crnn_ctc():
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
         training = tf.placeholder(tf.bool, name='training')
-        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training, stn = True)
+        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
         #net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
         #net_out = loccnnmodel.build_network(input_images, len(char_map_dict.keys()) + 1, training)
 
