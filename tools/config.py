@@ -57,6 +57,8 @@ network.cnn.net_name = "cnnnet"
 network.cnn.batch_size = 128
 network.cnn.stn = False
 network.cnn.rgb = False
+network.cnn.fixed_param = False
+network.cnn.train_weights = ['CRNN_CTC/locnet', 'CRNN_CTC/rgbnet']
 
 # dataset settings
 dataset = edict()
@@ -92,7 +94,7 @@ default.decay_steps = 10000
 default.decay_rate = 0.8
 default.log = "./info.log"
 # default network
-default.network = 'r50'
+default.network = 'cnn'
 default.pretrained = ''
 default.pretrained_epoch = 1
 # default dataset

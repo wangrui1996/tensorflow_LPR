@@ -163,7 +163,13 @@ def train_crnn_ctc():
 
     update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
     with tf.control_dependencies(update_ops):
-        optimizer = tf.train.AdadeltaOptimizer(learning_rate=learning_rate).minimize(loss=ctc_loss, global_step=global_step)
+        var_list = None
+        if config.fixed_param is not None and config.fixed_param:
+            var_list = []
+            for sc in config.train_weights:
+                sc_variable = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=sc)
+                var_list.extend(sc_variable)
+        optimizer = tf.train.AdadeltaOptimizer(learning_rate=learning_rate).minimize(loss=ctc_loss, global_step=global_step, var_list=var_list)
 
     init_op = tf.global_variables_initializer()
 
@@ -176,7 +182,7 @@ def train_crnn_ctc():
     # set checkpoint saver
     saver = tf.train.Saver()
     restore_path = tf.train.latest_checkpoint(default.model_save_path)
-    variables_to_restore = tf.contrib.framework.get_variables_to_restore(exclude=['CRNN_CTC/locnet'])
+    variables_to_restore = tf.contrib.framework.get_variables_to_restore(exclude=config.train_weights)
     init_fn = tf.contrib.framework.assign_from_checkpoint_fn(restore_path, variables_to_restore)
     if not os.path.exists(default.save_root_path):
         os.makedirs(default.save_root_path)

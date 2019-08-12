@@ -80,7 +80,7 @@ def build_network(images, num_classes=default.num_classes, training=None):
                 #loc_net = slim.repeat(images, 2, slim.conv2d, 32, kernel_size=3, stride=1, scope='loc_conv1')
                 #loc_net = slim.max_pool2d(loc_net, kernel_size=2, stride=2, scope='loc_pool1')
                 # 8 x 16
-                rgb_output = channel_wise_attention(rgb_concat_net, "RGB")
+                rgb_output = channel_wise_attention(rgb_concat_net, images, "RGB")
                 images = rgb_output
                 tf.logging.info("stn network loaded...")
 
