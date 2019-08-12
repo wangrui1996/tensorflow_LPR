@@ -61,7 +61,7 @@ def _string_to_int(label, char_map_dict=None):
         int_list.append(char_map_dict[c])
     return int_list
 
-def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None):
+def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None, training=False):
     if not os.path.exists(FLAGS.data_dir):
         os.makedirs(FLAGS.data_dir)
 
@@ -78,9 +78,11 @@ def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None):
                 print("Can not read image of : '{}'".format(image_path))
                 exit(0)
                 continue # skip bad image.
-
-            height = _IMAGE_HEIGHT + _CROP_SIZE
-            width = _IMAGE_WIDTH + _CROP_SIZE
+            height = _IMAGE_HEIGHT
+            width = _IMAGE_WIDTH
+            if training:
+                height = height + _CROP_SIZE
+                width = width + _CROP_SIZE
             image = cv2.resize(image, (width, height))
             is_success, image_buffer = cv2.imencode('.jpg', image)
             if not is_success:
@@ -117,7 +119,10 @@ def _convert_dataset():
 
     dataset_anno_lines = {'train' : train_anno_lines, 'validation' : validation_anno_lines}
     for dataset_split in ['train', 'validation']:
-        _write_tfrecord(dataset_split, dataset_anno_lines[dataset_split], char_map_dict)
+        if dataset_split == "validation":
+            _write_tfrecord(dataset_split, dataset_anno_lines[dataset_split], char_map_dict, False)
+        else:
+            _write_tfrecord(dataset_split, dataset_anno_lines[dataset_split], char_map_dict, True)
 
 def main(unused_argv):
     _convert_dataset()

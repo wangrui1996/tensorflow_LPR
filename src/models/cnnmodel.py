@@ -30,13 +30,17 @@ def build_network(images, num_classes=default.num_classes, training=None, stn=Fa
                 # localization network
 
                 # 64 x 128
-                loc_net = slim.repeat(images, 2, slim.conv2d, 32, kernel_size=3, stride=1, scope='loc_conv1')
-                loc_net = slim.max_pool2d(loc_net, kernel_size=2, stride=2, scope='loc_pool1')
+                avg_net = slim.avg_pool2d(images, kernel_size=2, stride=2, scope="loc_pool1")
                 # 32 x 64
-                loc_net = slim.repeat(loc_net, 2, slim.conv2d, 64, kernel_size=3, stride=1, scope='loc_conv2')
-                loc_net = slim.max_pool2d(loc_net, kernel_size=5, stride=4, scope='loc_pool2')
+                conv1_1_net = slim.conv2d(avg_net, 32, kernel_size=3, stride=4, scope='loc_conv11')
                 # 8 x 16
-                loc_net = slim.conv2d(loc_net, 128, kernel_size=3, stride=1, scope='loc_conv3')
+                conv1_2_net = slim.conv2d(images, 32, kernel_size=5, stride=8, scope='loc_conv11')
+
+                loc_concat_net = tf.concat(3, [conv1_1_net, conv1_2_net], name='loc_concat')
+                #loc_net = slim.repeat(images, 2, slim.conv2d, 32, kernel_size=3, stride=1, scope='loc_conv1')
+                #loc_net = slim.max_pool2d(loc_net, kernel_size=2, stride=2, scope='loc_pool1')
+                # 8 x 16
+                loc_net = slim.conv2d(conv1_2_net, 128, kernel_size=3, stride=1, scope='loc_conv3')
                 loc_net = slim.batch_norm(loc_net, decay=_BATCH_DECAY, is_training=training, scope='loc_bn1')
                 loc_net = slim.conv2d(loc_net, 32, kernel_size=3, stride=1, scope='loc_conv4')
                 loc_net = slim.batch_norm(loc_net, decay=_BATCH_DECAY, is_training=training, scope='loc_bn2')

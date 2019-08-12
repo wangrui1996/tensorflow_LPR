@@ -183,7 +183,9 @@ def resnet(data, units, num_stages, filter_list, filter_kernel, filter_stride, b
         #    name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
         current_stride = filter_stride[i+1]
         if current_stride > 1 and config.pool:
-            body = slim.max_pool2d(body, kernel_size=filter_kernel[i+1], stride=filter_stride[i+1], padding='SAME', scope='pool3')
+            body = Conv_unit(inputs=body, num_outputs=filter_list[i+1], kernel_size=filter_kernel[i+1], stride=filter_stride[i+1],
+                       normalizer_fn=slim.batch_norm, normalizer_params=bn_kwargs, scope="stage%d_unit%d" % (i + 1, 1))
+            body = slim.max_pool2d(body, kernel_size=filter_kernel[i+1], stride=1, padding='SAME', scope='pool3')
         else:
             body = Conv_unit(inputs=body, num_outputs=filter_list[i+1], kernel_size=filter_kernel[i+1], stride=filter_stride[i+1],
                        normalizer_fn=slim.batch_norm, normalizer_params=bn_kwargs, scope="stage%d_unit%d" % (i + 1, 1))
