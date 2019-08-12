@@ -56,6 +56,7 @@ network.cnn = edict()
 network.cnn.net_name = "cnnnet"
 network.cnn.batch_size = 128
 network.cnn.stn = False
+network.cnn.rgb = False
 
 # dataset settings
 dataset = edict()

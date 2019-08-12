@@ -5,15 +5,16 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 from tensorflow.contrib import slim
-from src.stn.transformer import spatial_transformer_network
+from src.utils.stn import spatial_transformer_network
+from src.utils.distribution import channel_wise_attention
 from tools.config import config, default
 _BATCH_DECAY = 0.999
 
 
-def build_network(images, num_classes=default.num_classes, training=None, stn=False):
+def build_network(images, num_classes=default.num_classes, training=None):
     tf.logging.info("Loading CNN Model")
 
-    if stn:
+    if config.stn:
         tf.logging.info("Start to loading stn network")
         # locnet
         with slim.arg_scope([slim.conv2d],
@@ -22,7 +23,7 @@ def build_network(images, num_classes=default.num_classes, training=None, stn=Fa
                             biases_initializer=None):
             with tf.variable_scope('locnet'):
                 n_fc = 6
-                B, H, W, C = images.shape
+                #B, H, W, C = images.shape
                 # identity transform
                 initial = np.array([[1., 0, 0], [0, 1., 0]])
                 initial = initial.astype('float32').flatten()
@@ -32,11 +33,11 @@ def build_network(images, num_classes=default.num_classes, training=None, stn=Fa
                 # 64 x 128
                 avg_net = slim.avg_pool2d(images, kernel_size=2, stride=2, scope="loc_pool1")
                 # 32 x 64
-                conv1_1_net = slim.conv2d(avg_net, 32, kernel_size=3, stride=4, scope='loc_conv11')
+                conv1_1_net = slim.conv2d(avg_net, 32, kernel_size=3, stride=4, scope='loc_conv1_1')
                 # 8 x 16
-                conv1_2_net = slim.conv2d(images, 32, kernel_size=5, stride=8, scope='loc_conv11')
+                conv1_2_net = slim.conv2d(images, 32, kernel_size=5, stride=8, scope='loc_conv1_2')
 
-                loc_concat_net = tf.concat(3, [conv1_1_net, conv1_2_net], name='loc_concat')
+                loc_concat_net = tf.concat([conv1_1_net, conv1_2_net], 3, name='loc_concat')
                 #loc_net = slim.repeat(images, 2, slim.conv2d, 32, kernel_size=3, stride=1, scope='loc_conv1')
                 #loc_net = slim.max_pool2d(loc_net, kernel_size=2, stride=2, scope='loc_pool1')
                 # 8 x 16
@@ -55,6 +56,32 @@ def build_network(images, num_classes=default.num_classes, training=None, stn=Fa
                 loc_net = tf.matmul(loc_net, W_fc1) + b_fc1
                 loc_output = spatial_transformer_network(images, loc_net)
                 images = loc_output
+                tf.logging.info("stn network loaded...")
+
+        # 1 x 2
+
+    if config.rgb:
+        tf.logging.info("Start to loading Init rgb network")
+        # rgbnet
+        with slim.arg_scope([slim.conv2d],
+                            weights_initializer=tf.truncated_normal_initializer(stddev=0.01),
+                            weights_regularizer=slim.l2_regularizer(0.0005),
+                            biases_initializer=None):
+            with tf.variable_scope('rgbnet'):
+                # identity transform
+                # 64 x 128
+                avg_net = slim.avg_pool2d(images, kernel_size=2, stride=2, scope="loc_pool1")
+                # 32 x 64
+                conv1_1_net = slim.conv2d(avg_net, 32, kernel_size=3, stride=4, scope='loc_conv1_1')
+                # 8 x 16
+                conv1_2_net = slim.conv2d(images, 32, kernel_size=5, stride=8, scope='loc_conv1_2')
+
+                rgb_concat_net = tf.concat([conv1_1_net, conv1_2_net], 3, name='loc_concat')
+                #loc_net = slim.repeat(images, 2, slim.conv2d, 32, kernel_size=3, stride=1, scope='loc_conv1')
+                #loc_net = slim.max_pool2d(loc_net, kernel_size=2, stride=2, scope='loc_pool1')
+                # 8 x 16
+                rgb_output = channel_wise_attention(rgb_concat_net, "RGB")
+                images = rgb_output
                 tf.logging.info("stn network loaded...")
 
         # 1 x 2

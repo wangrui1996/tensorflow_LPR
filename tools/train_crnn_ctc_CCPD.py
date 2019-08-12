@@ -187,7 +187,7 @@ def train_crnn_ctc():
     train_start_time = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
     model_name = 'crnn_ctc_ocr_{:s}.ckpt'.format(str(train_start_time))
     if config.stn :
-        model_save_path = os.path.join(default.model_stn_save_path)
+        model_save_path = os.path.join(default.model_stn_save_path, model_name)
     else:
         model_save_path = os.path.join(default.model_save_path, model_name)
     sess_config = tf.ConfigProto()
