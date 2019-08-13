@@ -6,28 +6,29 @@ config = edict()
 config.image_height = 64
 config.image_width = 128
 
-config.bn_mom = 0.9
-config.workspace = 256
-config.emb_size = 512
-config.ckpt_embedding = True
-config.net_se = 0
-config.net_act = 'prelu'
-config.net_unit = 3
-config.net_input = 1
-config.net_blocks = [1,4,6,2]
-config.net_output = 'E'
-config.net_multiplier = 1.0
-config.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
-config.ce_loss = True
-config.fc7_lr_mult = 1.0
-config.fc7_wd_mult = 1.0
-config.fc7_no_bias = False
-config.max_steps = 0
-config.data_rand_mirror = True
-config.data_cutoff = False
-config.data_color = 0
-config.data_images_filter = 0
-config.memonger = False #not work now
+#config.bn_mom = 0.9
+#config.workspace = 256
+#config.emb_size = 512
+#config.ckpt_embedding = True
+#config.net_se = 0
+#config.net_act = 'prelu'
+#config.net_unit = 3
+#config.net_input = 1
+#config.net_blocks = [1,4,6,2]
+#config.net_output = 'E'
+#config.net_multiplier = 1.0
+config.trainval_targets = ['base', 'blur', 'challenge', 'db', 'fn', 'rotate', 'ccpd_tilt','weather']
+config.train_ratio = [1, 0, 0 ,0 ,0 ,0 ,0 ,0]
+#config.ce_loss = True
+#config.fc7_lr_mult = 1.0
+#config.fc7_wd_mult = 1.0
+#config.fc7_no_bias = False
+#config.max_steps = 0
+#config.data_rand_mirror = True
+#config.data_cutoff = False
+#config.data_color = 0
+#config.data_images_filter = 0
+#config.memonger = False #not work now
 
 
 # network settings
@@ -64,18 +65,20 @@ network.cnn.train_weights = ['CRNN_CTC/locnet', 'CRNN_CTC/rgbnet']
 dataset = edict()
 
 dataset.emore = edict()
-dataset.image_list_path = "./data/anno_file.txt"
+dataset.image_list_path = "./data"
 dataset.dataset_path = "./data/CCPD2019/ccpd_base"
-dataset.data_save_path = "./data/images"
+dataset.dataset_root_path = "./data/CCPD2019"
 
 # default settings
 default = edict()
 default.CUDA_VISIBLE_DEVICES = "0"
-default.char_map_json_file = "./char_map/plate_map.json"
+default.plate_map_json_file = "./char_map/plate_map.json"
+default.province_map_json_file = "./char_map/province_map_CCPD.json"
+default.char_map_json_file = "./char_map/char_map_CCPD.json"
 default.dataset = "data_dir"
 default.image_dir = './data/images/'
 default.anno_file = './data/anno_file.txt'
-default.data_dir = './data/'
+default.data_store_path = './data/'
 default.validation_split_fraction = 0.1
 default.shuffle_list = True
 
@@ -114,9 +117,18 @@ default.lr_steps = '100000,160000,220000'
 default.models_root = './jobs'
 default.num_classes = 34
 default.tfrecord_path = "./data/"
-def generate_config(_network):
+def generate_config(_network, _dataset):
     for k, v in network[_network].items():
         config[k] = v
         if k in default:
             default[k] = v
+    for k, v in dataset[_dataset].items():
+      config[k] = v
+      if k in default:
+        default[k] = v
     config.network = _network
+    config.dataset = _dataset
+    for k, v in default.items():
+        config[k] = v
+    for k, v in dataset.items():
+        config[k] = v

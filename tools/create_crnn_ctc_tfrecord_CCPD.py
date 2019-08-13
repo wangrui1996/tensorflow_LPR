@@ -15,18 +15,14 @@ import tensorflow as tf
 import cv2
 import numpy as np
 
-from tools.config import config, default
-
+from tools.config import config, default, generate_config
+generate_config(default.network, default.dataset)
 _IMAGE_HEIGHT = config.image_height
 _IMAGE_WIDTH = config.image_width
 
 _CROP_SIZE = 5
 
-tf.app.flags.DEFINE_string(
-    'image_dir', default.image_dir, 'Dataset root folder with images.')
 
-tf.app.flags.DEFINE_string(
-    'anno_file', default.anno_file, 'Path of dataset annotation file.')
 
 tf.app.flags.DEFINE_string(
     'data_dir', default.data_dir, 'Directory where tfrecords are written to.')
@@ -34,8 +30,6 @@ tf.app.flags.DEFINE_string(
 tf.app.flags.DEFINE_float(
     'validation_split_fraction', default.validation_split_fraction, 'Fraction of training data to use for validation.')
 
-tf.app.flags.DEFINE_boolean(
-    'shuffle_list', default.shuffle_list, 'Whether shuffle data in annotation file list.')
 
 tf.app.flags.DEFINE_string(
     'char_map_json_file', default.char_map_json_file, 'Path to char map json file')
@@ -61,16 +55,16 @@ def _string_to_int(label, char_map_dict=None):
         int_list.append(char_map_dict[c])
     return int_list
 
-def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None, training=False):
-    if not os.path.exists(FLAGS.data_dir):
-        os.makedirs(FLAGS.data_dir)
+def write_tfrecord(dataset_split, anno_lines, char_map_dict=None, training=False):
+    if not os.path.exists(config.data_store_path):
+        os.makedirs(config.data_store_path)
 
-    tfrecords_path = os.path.join(FLAGS.data_dir, dataset_split + '.tfrecord')
+    tfrecords_path = os.path.join(config.data_store_path, dataset_split + '.tfrecord')
     with tf.python_io.TFRecordWriter(tfrecords_path) as writer:
         for i, line in enumerate(anno_lines):
             line = line.strip()
             image_name = line.split()[0]
-            image_path = os.path.join(FLAGS.image_dir, image_name)
+            image_path = os.path.join(default.image_dir, image_name)
             label = line.split()[1].lower()
 
             image = cv2.imread(image_path)
@@ -103,29 +97,31 @@ def _write_tfrecord(dataset_split, anno_lines, char_map_dict=None, training=Fals
         sys.stdout.write('>> {:s}.tfrecords write finish.'.format(dataset_split))
         sys.stdout.flush()
 
-def _convert_dataset():
-    char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
-    
-    with open(FLAGS.anno_file, 'r') as anno_fp:
-        anno_lines = anno_fp.readlines()
+def convert_dataset():
+    char_map_dict = json.load(open(config.plate_map_json_file, 'r'))
 
-    if FLAGS.shuffle_list:
-        random.shuffle(anno_lines)
-    
-    # split data in annotation list to train and val
-    split_index = int(len(anno_lines) * (1 - FLAGS.validation_split_fraction))
-    train_anno_lines = anno_lines[:split_index - 1]
-    validation_anno_lines = anno_lines[split_index:]
+    trainval_targets = config.trainval_targets
+    train_ratios = config.train_ratio
+    train_images_lines = []
+    for index in range(len(trainval_targets)):
+        dataset_name = trainval_targets[index]
+        train_ratio = train_ratios[index]
+        image_list_path = os.path.join(config.data_store_path, "{}.txt".format(dataset_name))
+        with open(image_list_path, 'r') as image_list:
+            images_lines = image_list.readlines()
+            if config.shuffle_list:
+                random.shuffle(images_lines)
+        # split data in annotation list to train and val
+        split_index = int(len(images_lines) * (1 - train_ratio))
+        train_images_lines = train_images_lines + images_lines[:split_index - 1]
+        validation_images_lines = images_lines[split_index:]
+        if len(validation_images_lines) != 0:
+            write_tfrecord(dataset_name, validation_images_lines, char_map_dict, False)
+    write_tfrecord('train', train_images_lines, char_map_dict, True)
 
-    dataset_anno_lines = {'train' : train_anno_lines, 'validation' : validation_anno_lines}
-    for dataset_split in ['train', 'validation']:
-        if dataset_split == "validation":
-            _write_tfrecord(dataset_split, dataset_anno_lines[dataset_split], char_map_dict, False)
-        else:
-            _write_tfrecord(dataset_split, dataset_anno_lines[dataset_split], char_map_dict, True)
 
-def main(unused_argv):
-    _convert_dataset()
+def main():
+    convert_dataset()
 
 if __name__ == '__main__':
-    tf.app.run()
+    main()
