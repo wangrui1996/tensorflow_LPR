@@ -9,29 +9,14 @@ generate_config(default.network, default.dataset)
 
 thread_num = 100
 
-
-
-char_label_map_path = config.char_map_json_file
-with open(char_label_map_path, "r") as f:
-    char_label_map = json.load(f)
-
-province_label_map_path = config.province_map_json_file
-with open(province_label_map_path, "r") as f:
-    province_label_map = json.load(f)
-
-plate_label_map_path = config.plate_map_json_file
+index = 1
+lock = multiprocessing.Lock()
+executor = ThreadPoolExecutor(thread_num)
 
 def find_key_by_value(label_map, value):
     for label in label_map:
         if label_map[str(label)] == value:
             return label
-
-#img_txt_file = open(image_list_path, "w+")
-
-index = 1
-lock = multiprocessing.Lock()
-executor = ThreadPoolExecutor(thread_num)
-
 
 def write_to_files(dataset_path, image_save_path, image_list_path):
     img_txt_file = open(image_list_path, "w+")
@@ -70,23 +55,48 @@ def write_to_files(dataset_path, image_save_path, image_list_path):
                 img_label = "{}{}".format(find_key_by_value(province_label_map, img_label_list[0]), img_label[1:])
                 img_txt_file.writelines("{} {}\n".format(os.path.basename(save_img_path), img_label.lower()))
 
-trainval_datasets = config.trainval_targets
-train_ratio = config.train_ratio
 
-for dataset in trainval_datasets:
-    dataset_path = os.path.join(config.dataset_root_path, "ccpd_{}".format(dataset))
-    image_save_path = os.path.join(config.data_store_path, "images")
-    if not os.path.exists(image_save_path):
-        os.mkdir(image_save_path)
-    image_list_path = os.path.join(config.data_store_path, "{}.txt".format(dataset))
-    global index
-    index = 0
-    write_to_files(dataset_path, image_save_path, image_list_path)
+#img_txt_file = open(image_list_path, "w+")
 
-executor.shutdown(wait=True)
-for key in province_label_map:
-    province_label_map[key] = province_label_map[key] + len(char_label_map)
-with open(plate_label_map_path, "w+") as f:
-    json.dump({**char_label_map ,**province_label_map}, f)
 
-print("finished")
+
+def make_image_list():
+    with open(config.char_map_json_file, "r") as f:
+        char_label_map = json.load(f)
+
+    province_label_map_path = config.province_map_json_file
+    with open(province_label_map_path, "r") as f:
+        province_label_map = json.load(f)
+
+    plate_label_map_path = config.plate_map_json_file
+
+
+
+    trainval_datasets = config.trainval_targets
+
+    for dataset_name in trainval_datasets:
+        dataset_path = os.path.join(config.dataset_root_path, "ccpd_{}".format(dataset_name))
+        image_save_root_path = os.path.join(config.data_store_path, "images")
+        if not os.path.exists(image_save_root_path):
+            os.mkdir(image_save_root_path)
+        image_save_subdataset_path = os.path.join(image_save_root_path, dataset_name)
+        if not os.path.exists(image_save_subdataset_path):
+            os.mkdir(image_save_subdataset_path)
+        image_list_path = os.path.join(config.data_store_path, "{}.txt".format(dataset_name))
+        global index
+        index = 0
+        write_to_files(dataset_path, image_save_subdataset_path, image_list_path)
+
+    executor.shutdown(wait=True)
+    for key in province_label_map:
+        province_label_map[key] = province_label_map[key] + len(char_label_map)
+    with open(plate_label_map_path, "w+") as f:
+        json.dump({**char_label_map, **province_label_map}, f)
+
+    print("finished")
+
+def main():
+    make_image_list()
+
+if __name__ == '__main__':
+    main()

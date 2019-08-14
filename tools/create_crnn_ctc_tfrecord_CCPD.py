@@ -23,19 +23,6 @@ _IMAGE_WIDTH = config.image_width
 _CROP_SIZE = 5
 
 
-
-tf.app.flags.DEFINE_string(
-    'data_dir', default.data_dir, 'Directory where tfrecords are written to.')
-
-tf.app.flags.DEFINE_float(
-    'validation_split_fraction', default.validation_split_fraction, 'Fraction of training data to use for validation.')
-
-
-tf.app.flags.DEFINE_string(
-    'char_map_json_file', default.char_map_json_file, 'Path to char map json file')
-
-FLAGS = tf.app.flags.FLAGS
-
 def _int64_feature(value):
     if not isinstance(value, list):
         value = [value]
@@ -49,7 +36,7 @@ def _bytes_feature(value):
 def _string_to_int(label, char_map_dict=None):
     if char_map_dict is None:
         # convert string label to int list by char map
-        char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
+        char_map_dict = json.load(open(config.char_map_json_file, 'r'))
     int_list = []
     for c in label:
         int_list.append(char_map_dict[c])
@@ -112,8 +99,8 @@ def convert_dataset():
             if config.shuffle_list:
                 random.shuffle(images_lines)
         # split data in annotation list to train and val
-        split_index = int(len(images_lines) * (1 - train_ratio))
-        train_images_lines = train_images_lines + images_lines[:split_index - 1]
+        split_index = int(len(images_lines) * train_ratio)
+        train_images_lines = train_images_lines + images_lines[:split_index]
         validation_images_lines = images_lines[split_index:]
         if len(validation_images_lines) != 0:
             write_tfrecord(dataset_name, validation_images_lines, char_map_dict, False)
