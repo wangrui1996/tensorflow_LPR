@@ -95,7 +95,7 @@ def make_image_list():
         image_list_path = os.path.join(config.data_store_path, "{}.txt".format(dataset_name))
         write_to_files(dataset_path, image_save_subdataset_path, image_list_path, executor)
         executor.shutdown(wait=True)
-        global index
+        print("\n")
         with lock:
             tf.logging.info("Top handle {}s in {}".format(index, dataset_name))
 
