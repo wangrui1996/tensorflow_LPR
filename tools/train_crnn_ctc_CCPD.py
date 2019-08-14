@@ -114,27 +114,45 @@ def _read_test_tfrecord(tfrecord_path, num_epochs=None):
     imagenames = features['imagenames']
     return images, labels, sequence_length, imagenames
 
-
 def train_crnn_ctc():
-    train_tfrecord_path = os.path.join(default.tfrecord_path, 'train.tfrecord')
+    train_tfrecord_path = os.path.join(config.data_store_path, 'train.tfrecord')
     train_images, train_labels, train_sequence_lengths, _ = _read_train_tfrecord(tfrecord_path=train_tfrecord_path)
-    test_tfrecord_path = os.path.join(default.tfrecord_path, 'validation.tfrecord')
-    test_images, test_labels, test_sequence_lengths, test_imagenames = _read_test_tfrecord(tfrecord_path=test_tfrecord_path)
+    trainval_targets = config.trainval_targets
+    step_nums, accuracys, accuracys_max = [], dict(), dict()
+    test_datasets_name, test_images, test_labels, test_sequence_lengths, test_imagenames = [], [], [] ,[], []
+    for dataset_name in trainval_targets:
+        test_tfrecord_path = os.path.join(config.data_store_path, '{}.tfrecord'.format(dataset_name))
+        if os.path.exists(test_tfrecord_path):
+            test_image, test_label, test_sequence_length, test_imagename = _read_test_tfrecord(tfrecord_path=test_tfrecord_path)
+            test_datasets_name.append(dataset_name)
+            test_images.append(test_image)
+            test_labels.append(test_label)
+            test_sequence_lengths.append(test_sequence_length)
+            test_imagenames.append(test_imagename)
+            accuracys_max[dataset_name] = -1.0
+            # get the test iter size
+            test_sample_count = 0
+            for _ in tf.python_io.tf_record_iterator(test_tfrecord_path):
+                test_sample_count += 1
+            step_nums.append(test_sample_count // config.batch_size)
 
-    # get the test iter size
-    test_sample_count = 0
-    for _ in tf.python_io.tf_record_iterator(test_tfrecord_path):
-        test_sample_count += 1
-    step_nums = test_sample_count // config.batch_size
+
+
 
     # decode the training data from tfrecords
     train_batch_images, train_batch_labels, train_batch_sequence_lengths = tf.train.batch(
         tensors=[train_images, train_labels, train_sequence_lengths], batch_size=config.batch_size, dynamic_pad=True,
         capacity=1000 + 2*config.batch_size, num_threads=default.num_threads)
     # decode the testing data from tfrecords
-    test_batch_images, test_batch_labels, test_batch_sequence_lengths, test_batch_imagenames = tf.train.batch(
-        tensors=[test_images, test_labels, test_sequence_lengths, test_imagenames], batch_size=config.batch_size, dynamic_pad=True,
-        capacity=1000 + 2*config.batch_size, num_threads=default.num_threads)
+    test_batch_images, test_batch_labels, test_batch_sequence_lengths, test_batch_imagenames = [], [], [], []
+    for id, _ in enumerate(test_datasets_name):
+        test_batch_image, test_batch_label, test_batch_sequence_length, test_batch_imagename = tf.train.batch(
+            tensors=[test_images[id], test_labels[id], test_sequence_lengths[id], test_imagenames[id]], batch_size=config.batch_size, dynamic_pad=True,
+            capacity=1000 + 2*config.batch_size, num_threads=default.num_threads)
+        test_batch_images.append(test_batch_image)
+        test_batch_labels.append(test_batch_label)
+        test_batch_sequence_lengths.append(test_batch_sequence_length)
+        test_batch_imagenames.append(test_batch_imagename)
 
     input_images = tf.placeholder(tf.float32, shape=[config.batch_size, _IMAGE_HEIGHT, _IMAGE_WIDTH, 3], name='input_images')
     input_labels = tf.sparse_placeholder(tf.int32, name='input_labels')
@@ -192,7 +210,7 @@ def train_crnn_ctc():
         os.makedirs(default.model_stn_save_path)
     train_start_time = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
     model_name = 'crnn_ctc_ocr_{:s}.ckpt'.format(str(train_start_time))
-    if config.stn :
+    if config.stn:
         model_save_path = os.path.join(default.model_stn_save_path, model_name)
     else:
         model_save_path = os.path.join(default.model_save_path, model_name)
@@ -217,39 +235,40 @@ def train_crnn_ctc():
         tf.logging.info("{} step per save".format(default.step_per_save))
         tf.logging.info("----------------------------------------------------------")
         for step in range(default.max_train_steps):
-            if (step + 1) % default.step_per_test == 0 or step == 0:
-                accuracy = []
-                for _ in range(step_nums):
-                    imgs, lbls, seq_lens, names = sess.run([test_batch_images, test_batch_labels, test_batch_sequence_lengths, test_batch_imagenames])
-                    preds = sess.run(ctc_decoded, feed_dict={input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens, training:False})
-                    preds = _sparse_matrix_to_list(preds[0], char_map_dict)
-                    lbls = _sparse_matrix_to_list(lbls, char_map_dict)
-                    #print(preds)
-                    # #print(lbls)
-                    for index, lbl in enumerate(lbls):
-                        pred = preds[index]
-                        total_count = len(lbl)
-                        correct_count = 0
-                        try:
-                            for i, tmp in enumerate(lbl):
-                                if tmp == pred[i]:
-                                    correct_count += 1
-                        except IndexError:
-                            continue
-                        finally:
+            if (step + 1) % config.step_per_test == 0 or step == 0:
+                for id, _ in test_datasets_name:
+                    accuracy = []
+                    for _ in range(step_nums[id]):
+                        imgs, lbls, seq_lens, names = sess.run([test_batch_images[id], test_batch_labels[id], test_batch_sequence_lengths[id], test_batch_imagenames[id]])
+                        preds = sess.run(ctc_decoded, feed_dict={input_images:imgs, input_labels:lbls, input_sequence_lengths:seq_lens, training:False})
+                        preds = _sparse_matrix_to_list(preds[0], char_map_dict)
+                        lbls = _sparse_matrix_to_list(lbls, char_map_dict)
+                        #print(preds)
+                        # #print(lbls)
+                        for index, lbl in enumerate(lbls):
+                            pred = preds[index]
+                            total_count = len(lbl)
+                            correct_count = 0
                             try:
-                                accuracy.append(correct_count / total_count)
-                            except ZeroDivisionError:
-                                if len(pred) == 0:
-                                    accuracy.append(1)
-                                else:
-                                    accuracy.append(0)
+                                for i, tmp in enumerate(lbl):
+                                    if tmp == pred[i]:
+                                        correct_count += 1
+                            except IndexError:
+                                continue
+                            finally:
+                                try:
+                                    accuracy.append(correct_count / total_count)
+                                except ZeroDivisionError:
+                                    if len(pred) == 0:
+                                        accuracy.append(1)
+                                    else:
+                                        accuracy.append(0)
        #             for index, img in enumerate(imgs):
        #                 print('Predict {:s} image with gt label: {:s} <--> predict label: {:s}'.format(str(names[index]), str(lbls[index]), str(preds[index])), flush=True)
-                accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
-                if accuracy > test_max_acc:
-                    test_max_acc = accuracy
-                tf.logging.info('Mean test accuracy is {:5f}, Max test accuracy is: {:5f}'.format(accuracy, test_max_acc))
+                    accuracy = np.mean(np.array(accuracy).astype(np.float32), axis=0)
+                    if accuracy > accuracys_max[test_datasets_name[id]]:
+                        accuracys_max[test_datasets_name[id]] = accuracy
+                    tf.logging.info('Test dataset {} , Mean test accuracy is {:5f}, Max test accuracy is: {:5f}'.format(test_datasets_name[id], accuracy, accuracys_max[test_datasets_name[id]]))
 
 
             imgs, lbls, seq_lens = sess.run([train_batch_images, train_batch_labels, train_batch_sequence_lengths])

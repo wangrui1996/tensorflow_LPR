@@ -76,9 +76,7 @@ default.plate_map_json_file = "./char_map/plate_map.json"
 default.province_map_json_file = "./char_map/province_map_CCPD.json"
 default.char_map_json_file = "./char_map/char_map_CCPD.json"
 default.dataset = "data_dir"
-default.anno_file = './data/anno_file.txt'
 default.data_store_path = './data/'
-default.validation_split_fraction = 0.1
 default.shuffle_list = True
 
 default.save_root_path = "./jobs/"
