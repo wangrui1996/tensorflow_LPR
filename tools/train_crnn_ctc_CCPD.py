@@ -29,7 +29,7 @@ def _sparse_matrix_to_list(sparse_matrix, char_map_dict=None):
 
     # the last index in sparse_matrix is ctc blanck note
     if char_map_dict is None:
-        char_map_dict = json.load(open(default.char_map_json_file, 'r'))
+        char_map_dict = json.load(open(config.plate_map_json_file, 'r'))
     assert(isinstance(char_map_dict, dict) and 'char_map_dict is not a dict')    
 
     dense_matrix =  len(char_map_dict.keys()) * np.ones(dense_shape, dtype=np.int32)
@@ -45,7 +45,7 @@ def _sparse_matrix_to_list(sparse_matrix, char_map_dict=None):
 
 def _int_to_string(value, char_map_dict=None):
     if char_map_dict is None:
-        char_map_dict = json.load(open(default.char_map_json_file, 'r'))
+        char_map_dict = json.load(open(config.plate_map_json_file, 'r'))
     assert(isinstance(char_map_dict, dict) and 'char_map_dict is not a dict')
     
     for key in char_map_dict.keys():
@@ -148,7 +148,7 @@ def train_crnn_ctc():
     input_labels = tf.sparse_placeholder(tf.int32, name='input_labels')
     input_sequence_lengths = tf.placeholder(dtype=tf.int32, shape=[config.batch_size], name='input_sequence_lengths')
 
-    char_map_dict = json.load(open(default.char_map_json_file, 'r'))
+    char_map_dict = json.load(open(config.plate_map_json_file, 'r'))
     # initialise the net model
 
     with tf.variable_scope('CRNN_CTC', reuse=False):
@@ -226,7 +226,7 @@ def train_crnn_ctc():
         tf.logging.info("----------------------------------------------------------")
         for step in range(default.max_train_steps):
             if (step + 1) % config.step_per_test == 0 or step == 0:
-                for id, _ in test_datasets_name:
+                for id, _ in enumerate(test_datasets_name):
                     accuracy = []
                     for _ in range(step_nums[id]):
                         imgs, lbls, seq_lens, names = sess.run([test_batch_images[id], test_batch_labels[id], test_batch_sequence_lengths[id], test_batch_imagenames[id]])
