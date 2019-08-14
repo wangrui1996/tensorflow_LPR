@@ -26,7 +26,7 @@ def find_key_by_value(label_map, value):
         if label_map[str(label)] == value:
             return label
 
-def write_to_files(dataset_path, image_save_path, image_list_path, executor):
+def write_to_files(dataset_path, image_save_path, image_list_path, dataset_name, executor):
     img_txt_file = open(image_list_path, "w+")
     for r, d, f in os.walk(dataset_path):
         for file in f:
@@ -63,7 +63,7 @@ def write_to_files(dataset_path, image_save_path, image_list_path, executor):
                 for i in img_label_list:
                     img_label = img_label + find_key_by_value(char_label_map, i)
                 img_label = "{}{}".format(find_key_by_value(province_label_map, img_label_list[0]), img_label[1:])
-                img_txt_file.writelines("{} {}\n".format(os.path.basename(save_img_path), img_label.lower()))
+                img_txt_file.writelines("{} {}\n".format(os.path.join(dataset_name, os.path.basename(save_img_path)), img_label.lower()))
 
 
 #img_txt_file = open(image_list_path, "w+")
@@ -93,7 +93,7 @@ def make_image_list():
         if not os.path.exists(image_save_subdataset_path):
             os.mkdir(image_save_subdataset_path)
         image_list_path = os.path.join(config.data_store_path, "{}.txt".format(dataset_name))
-        write_to_files(dataset_path, image_save_subdataset_path, image_list_path, executor)
+        write_to_files(dataset_path, image_save_subdataset_path, image_list_path, dataset_name, executor)
         executor.shutdown(wait=True)
         print("\n")
         with lock:
