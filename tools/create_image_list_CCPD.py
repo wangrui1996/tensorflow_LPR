@@ -52,7 +52,7 @@ def write_to_files(dataset_path, image_save_path, image_list_path, dataset_name,
                         index = index + 1
                         if index % 1000 == 0:
                             sys.stdout.write(
-                                '\r>>Writing to {:s}.tfrecords {:d}'.format(dataset_path, index))
+                                '\r>>Writing to {:s} {:d}'.format(dataset_path, index))
                             sys.stdout.flush()
 
 

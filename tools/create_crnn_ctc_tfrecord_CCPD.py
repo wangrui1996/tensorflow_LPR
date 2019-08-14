@@ -51,8 +51,8 @@ def write_tfrecord(dataset_split, anno_lines, char_map_dict=None, training=False
         for i, line in enumerate(anno_lines):
             line = line.strip()
             image_name = line.split()[0]
-            image_path = os.path.join(config.data_store_path, "images", dataset_split, image_name)
-            label = line.split()[1].lower()
+            image_path = os.path.join(config.data_store_path, "images", image_name)
+            label = line.split()[-1].lower()
 
             image = cv2.imread(image_path)
             if image is None:
