@@ -1,5 +1,6 @@
 import os
 import cv2
+import sys
 from tools.config import dataset, config, default,generate_config
 import tensorflow as tf
 from concurrent.futures import ThreadPoolExecutor
@@ -50,7 +51,7 @@ def write_to_files(dataset_path, image_save_path, image_list_path):
                         global index
                         index = index + 1
                         if index % 1000 == 0:
-                            tf.logging.info("pregress {}".format(index))
+                            tf.logging.info("\rpregress {}".format(index))
 
 
                 executor.submit(progress, img_path, save_img_path, x1,y1,x2,y2)
@@ -89,8 +90,7 @@ def make_image_list():
         global index
         index = 0
         write_to_files(dataset_path, image_save_subdataset_path, image_list_path)
-
-        tf.logging.info("\rFinished ...".format(dataset_name))
+        tf.logging.info("Finished ...".format(dataset_name))
     executor.shutdown(wait=True)
 
     for key in province_label_map:
