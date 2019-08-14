@@ -15,18 +15,8 @@ tf.logging.set_verbosity(tf.logging.INFO)
 from src.models import cnnmodel
 from tools.config import config, generate_config, default
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Train face network")
-    # general
-    parser.add_argument("--network", default=default.network, help="network config")
-    #parser.add_argument("--loss", default=default.loss, help="loss config")
-    #parser.add_argument("--dataset", default=default.dataset, help="dataset")
-    args, rest = parser.parse_known_args()
-    generate_config(args.network)
-    args = parser.parse_args()
-    return args
+generate_config(default.network, default.dataset)
 
-parse_args()
 
 os.environ["CUDA_VISIBLE_DEVICES"]=default.CUDA_VISIBLE_DEVICES
 _IMAGE_HEIGHT = config.image_height
