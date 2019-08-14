@@ -89,9 +89,9 @@ def make_image_list():
         global index
         index = 0
         write_to_files(dataset_path, image_save_subdataset_path, image_list_path)
-        executor.shutdown(wait=True)
-        tf.logging.info("Finished ...\n".format(dataset_name))
 
+        tf.logging.info("\rFinished ...".format(dataset_name))
+    executor.shutdown(wait=True)
 
     for key in province_label_map:
         province_label_map[key] = province_label_map[key] + len(char_label_map)
