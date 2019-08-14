@@ -1,10 +1,12 @@
 import os
 import cv2
 from tools.config import dataset, config, default,generate_config
+import tensorflow as tf
 from concurrent.futures import ThreadPoolExecutor
 import multiprocessing
 import json
-
+# set log level
+tf.logging.set_verbosity(tf.logging.INFO)
 generate_config(default.network, default.dataset)
 
 thread_num = 100
@@ -48,7 +50,7 @@ def write_to_files(dataset_path, image_save_path, image_list_path):
                         global index
                         index = index + 1
                         if index % 1000 == 0:
-                            print("pregress {}".format(index))
+                            tf.logging.info("pregress {}".format(index))
 
 
                 executor.submit(progress, img_path, save_img_path, x1,y1,x2,y2)
@@ -75,6 +77,7 @@ def make_image_list():
     trainval_datasets = config.trainval_targets
 
     for dataset_name in trainval_datasets:
+        tf.logging.info("Loading dataset: {} ".format(dataset_name))
         dataset_path = os.path.join(config.dataset_root_path, "ccpd_{}".format(dataset_name))
         image_save_root_path = os.path.join(config.data_store_path, "images")
         if not os.path.exists(image_save_root_path):
@@ -86,8 +89,10 @@ def make_image_list():
         global index
         index = 0
         write_to_files(dataset_path, image_save_subdataset_path, image_list_path)
+        executor.shutdown(wait=True)
+        tf.logging.info("Finished ...\n".format(dataset_name))
 
-    executor.shutdown(wait=True)
+
     for key in province_label_map:
         province_label_map[key] = province_label_map[key] + len(char_label_map)
     with open(plate_label_map_path, "w+") as f:
