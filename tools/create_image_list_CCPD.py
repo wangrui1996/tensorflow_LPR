@@ -97,7 +97,7 @@ def make_image_list():
         executor.shutdown(wait=True)
         print("\n")
         with lock:
-            tf.logging.info("Top handle {}s in {}".format(index, dataset_name))
+            tf.logging.info("Top handle {} in {}".format(index, dataset_name))
 
 
     for key in province_label_map:
