@@ -14,7 +14,7 @@ thread_num = 100
 
 index = 1
 lock = multiprocessing.Lock()
-executor = ThreadPoolExecutor(thread_num)
+
 
 with open(config.char_map_json_file, "r") as f:
     char_label_map = json.load(f)
@@ -26,7 +26,8 @@ def find_key_by_value(label_map, value):
         if label_map[str(label)] == value:
             return label
 
-def write_to_files(dataset_path, image_save_path, image_list_path):
+def write_to_files(dataset_path, image_save_path, image_list_path, executor):
+    index = 0
     img_txt_file = open(image_list_path, "w+")
     for r, d, f in os.walk(dataset_path):
         for file in f:
@@ -80,6 +81,7 @@ def make_image_list():
     trainval_datasets = config.trainval_targets
 
     for dataset_name in trainval_datasets:
+        executor = ThreadPoolExecutor(thread_num)
         tf.logging.info("Loading dataset: {} ".format(dataset_name))
         dataset_path = os.path.join(config.dataset_root_path, "ccpd_{}".format(dataset_name))
         image_save_root_path = os.path.join(config.data_store_path, "images")
@@ -91,9 +93,10 @@ def make_image_list():
         image_list_path = os.path.join(config.data_store_path, "{}.txt".format(dataset_name))
         global index
         index = 0
-        write_to_files(dataset_path, image_save_subdataset_path, image_list_path)
+        write_to_files(dataset_path, image_save_subdataset_path, image_list_path, executor)
+        executor.shutdown(wait=True)
         tf.logging.info("Finished ...".format(dataset_name))
-    executor.shutdown(wait=True)
+
 
     for key in province_label_map:
         province_label_map[key] = province_label_map[key] + len(char_label_map)
