@@ -13,6 +13,11 @@ index = 1
 lock = multiprocessing.Lock()
 executor = ThreadPoolExecutor(thread_num)
 
+with open(config.char_map_json_file, "r") as f:
+    char_label_map = json.load(f)
+with open(config.province_map_json_file, "r") as f:
+    province_label_map = json.load(f)
+
 def find_key_by_value(label_map, value):
     for label in label_map:
         if label_map[str(label)] == value:
@@ -61,12 +66,7 @@ def write_to_files(dataset_path, image_save_path, image_list_path):
 
 
 def make_image_list():
-    with open(config.char_map_json_file, "r") as f:
-        char_label_map = json.load(f)
 
-    province_label_map_path = config.province_map_json_file
-    with open(province_label_map_path, "r") as f:
-        province_label_map = json.load(f)
 
     plate_label_map_path = config.plate_map_json_file
 
