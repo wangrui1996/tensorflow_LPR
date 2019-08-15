@@ -177,11 +177,11 @@ def build_network(images, num_classes=default.num_classes, training=None):
             net = slim.repeat(net, 3, slim.conv2d, 512, kernel_size=3, stride=1, scope='conv4')
             C3 = net
 
-            net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool3')
+            net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool4')
             # 4 x 16
-            net = slim.repeat(net, 3, slim.conv2d, 512, kernel_size=3, stride=1, scope='conv4')
+            net = slim.repeat(net, 3, slim.conv2d, 512, kernel_size=3, stride=1, scope='conv5')
             C4 = net
-            net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool3')
+            net = slim.max_pool2d(net, kernel_size=[2, 1], stride=[2, 1], scope='pool5')
             # 1 x 16
             C5 = net
 
