@@ -13,6 +13,7 @@ import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.INFO)
 
 from src.models import cnnmodel
+from src.models import pyramidcnnmodel
 from tools.config import config, generate_config, default
 
 generate_config(default.network, default.dataset)
@@ -151,11 +152,11 @@ def train_crnn_ctc():
     char_map_dict = json.load(open(config.plate_map_json_file, 'r'))
     # initialise the net model
 
-    with tf.variable_scope('CRNN_CTC', reuse=False):
-        training = tf.placeholder(tf.bool, name='training')
-        net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
-        #net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
-        #net_out = loccnnmodel.build_network(input_images, len(char_map_dict.keys()) + 1, training)
+    training = tf.placeholder(tf.bool, name='training')
+    #net_out = cnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+    net_out = pyramidcnnmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+    #net_out = resmodel.build_network(input_images,  len(char_map_dict.keys()) + 1, training)
+    #net_out = loccnnmodel.build_network(input_images, len(char_map_dict.keys()) + 1, training)
 
     ctc_loss = tf.reduce_mean(
         tf.nn.ctc_loss(labels=input_labels, inputs=net_out, sequence_length=input_sequence_lengths,

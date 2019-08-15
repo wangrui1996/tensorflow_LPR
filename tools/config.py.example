@@ -61,18 +61,6 @@ network.cnn.rgb = False
 network.cnn.fixed_param = False
 network.cnn.train_weights = ['CRNN_CTC/locnet', 'CRNN_CTC/rgbnet']
 
-
-network.pyramid = edict()
-network.pyramid.net_name = "pyramidcnnnet"
-network.pyramid.batch_size = 128
-network.pyramid.stn = False
-network.pyramid.rgb = False
-network.pyramid.with_CPFE = True
-network.pyramid.with_SA = True
-network.pyramid.with_CA = True
-network.pyramid.fixed_param = False
-network.pyramid.train_weights = ['CRNN_CTC/locnet', 'CRNN_CTC/rgbnet']
-
 # dataset settings
 dataset = edict()
 

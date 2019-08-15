@@ -104,6 +104,8 @@ def convert_dataset():
         validation_images_lines = images_lines[split_index:]
         if len(validation_images_lines) != 0:
             write_tfrecord(dataset_name, validation_images_lines, char_map_dict, False)
+    if config.shuffle_list:
+        random.shuffle(train_images_lines)
     write_tfrecord('train', train_images_lines, char_map_dict, True)
 
 
