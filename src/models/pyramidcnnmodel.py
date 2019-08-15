@@ -23,7 +23,7 @@ def CFE(input_tensor, filters, block_id, training):
     cfe2 = AtrousBlock(input_tensor, filters, rate[1], block_id + '_cfe2')
     cfe3 = AtrousBlock(input_tensor, filters, rate[2], block_id + '_cfe3')
     cfe_concat = tf.concat([cfe0, cfe1, cfe2, cfe3], axis=-1, name=block_id + 'concatcfe')
-    cfe_concat = slim.batch_norm(cfe_concat, decay=_BATCH_DECAY, is_training=training, scope='bn1')
+    cfe_concat = slim.batch_norm(cfe_concat, decay=_BATCH_DECAY, is_training=training, scope=block_id + 'bn1')
     return cfe_concat
 
 def BilinearUpsampling(input_tensor, upsampling=(1,1), name=None):
