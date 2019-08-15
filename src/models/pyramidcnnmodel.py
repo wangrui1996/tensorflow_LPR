@@ -36,13 +36,13 @@ def BilinearDownsampling(input_tensor, upsampling=(1,1), name=None):
 
 
 def ChannelWiseAttention(input_tensor,name):
-    H, W, C = map(int, input_tensor.get_shape()[1:])
+    B, H, W, C = map(int, input_tensor.get_shape())
     attention = tf.reduce_mean(input_tensor, axis=[1, 2], keep_dims=True, name=name + "_GlobalAveragePooling2D")
     #attention = GlobalAveragePooling2D(name=name+'_GlobalAveragePooling2D')(inputs)
-    attention = slim.fully_connected(attention, C / 4)
+    attention = slim.fully_connected(attention, C // 4)
     attention = slim.fully_connected(attention, C, activation_fn=tf.nn.sigmoid)
     #attention = Dense(C, activation='sigmoid',activity_regularizer=l1_reg)(attention)
-    attention = tf.reshape(attention, [1, 1, C], name=name+"_repeat")
+    attention = tf.reshape(attention, [B, 1, 1, C], name=name+"_repeat")
     #attention = Reshape((1, 1, C),name=name+'_reshape')(attention)
     attention = tf.tile(attention, multiples=[1, H, W, 1], name=name + "_repeat")
     #attention = Repeat(repeat_list=[1, H, W, 1],name=name+'_repeat')(attention)
@@ -195,7 +195,7 @@ def build_network(images, num_classes=default.num_classes, training=None):
                 C2_cfe = CFE(C2, 32, 'C4_cfe', training)
                 C3_cfe = CFE(C3, 32, 'C5_cfe', training)
                 C1_cfe = BilinearDownsampling(C1_cfe, upsampling=(4, 4), name="C5_cfe_up4")
-                C2_cfe = BilinearUpsampling(C2_cfe, upsampling=(2, 2), name="C4_cfe_up2")
+                C2_cfe = BilinearDownsampling(C2_cfe, upsampling=(2, 2), name="C4_cfe_up2")
                 C123 = tf.concat([C1_cfe, C2_cfe, C3_cfe], axis=-1, name='C123_aspp_concat')
 
             C123 = slim.conv2d(C123, 64, kernel_size=1, scope='C123_conv')
@@ -203,7 +203,7 @@ def build_network(images, num_classes=default.num_classes, training=None):
             #C123 = BilinearUpsampling(C345, upsampling=(4, 4), name="C123_up4")
 
             if config.with_SA:
-                C5 = BilinearUpsampling(C5, upsampling=(4,1), name="C2_up2")
+                C5 = BilinearUpsampling(C5, upsampling=(2,1), name="C2_up2")
                 C45 = tf.concat([C4, C5], axis=-1, name='C12_concat')
                 #C12 = tf.con`(name='C12_concat', axis=-1)([C1, C2])
                 C45 = slim.conv2d(C45, 64, kernel_size=3, scope='C12_conv')
@@ -219,7 +219,8 @@ def build_network(images, num_classes=default.num_classes, training=None):
             C123 = tf.multiply(SA, C123, name="C123_atten_multiply")
 
             net = tf.concat([C123, C45], axis=-1, name="fuse_concat")
-            net = slim.conv2d(net, 256, padding="VALID", kernel_size=3, stride=[2, 1], scope='conv6')
+            net = slim.conv2d(net, 256, padding="VALID", kernel_size=[2,1], stride=[2, 1], scope='conv6')
+            net.get_shape()
             # 2 x 32
             cnn_out = slim.conv2d(net, 512, padding="VALID", kernel_size=[4, 1], stride=1, scope='conv7')
             # 1 x 32
