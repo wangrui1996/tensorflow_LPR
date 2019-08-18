@@ -106,7 +106,7 @@ default.decay_steps = 10000
 default.decay_rate = 0.8
 default.log = "./info.log"
 # default network
-default.network = 'cnn'
+default.network = 'pyramid'
 default.pretrained = ''
 default.pretrained_epoch = 1
 # default dataset
