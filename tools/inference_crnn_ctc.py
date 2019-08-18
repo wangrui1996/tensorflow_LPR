@@ -9,28 +9,24 @@ import tensorflow as tf
 
 import cv2
 import numpy as np
-from src.models import loccnnmodel
+from src.models import pyramidcnnmodel
+from tools.config import config, generate_config, default
+
+generate_config(default.network, default.dataset)
 
 os.environ["CUDA_VISIBLE_DEVICES"]=""
 
 _IMAGE_HEIGHT = 64
 _IMAGE_WIDTH = 128
 
-# ------------------------------------Basic prameters------------------------------------
-tf.app.flags.DEFINE_string(
-    'image_dir', './test_data/images/', 'Path to the directory containing images.')
+image_dir = './test_data/images/'
 
-tf.app.flags.DEFINE_string(
-    'image_list', './test_data/image_list.txt', 'Path to the images list txt file.')
+# ------------------------------------Basic prameters------------------------------------
+image_list = './test_data/image_list.txt'
 
 tf.app.flags.DEFINE_string(
     'model_dir', './model/', 'Base directory for the model.')
 
-# ------------------------------------Char dictionary------------------------------------
-tf.app.flags.DEFINE_string(
-    'char_map_json_file', './char_map/plate_map.json', 'Path to char map json file')
-
-FLAGS = tf.app.flags.FLAGS
 
 def _sparse_matrix_to_list(sparse_matrix, char_map_dict=None):
     indices = sparse_matrix.indices
@@ -39,7 +35,7 @@ def _sparse_matrix_to_list(sparse_matrix, char_map_dict=None):
 
     # the last index in sparse_matrix is ctc blanck note
     if char_map_dict is None:
-        char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
+        char_map_dict = json.load(open(config.plate_map_json_file, 'r'))
     assert(isinstance(char_map_dict, dict) and 'char_map_dict is not a dict')    
 
     dense_matrix =  len(char_map_dict.keys()) * np.ones(dense_shape, dtype=np.int32)
@@ -55,7 +51,7 @@ def _sparse_matrix_to_list(sparse_matrix, char_map_dict=None):
 
 def _int_to_string(value, char_map_dict=None):
     if char_map_dict is None:
-        char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
+        char_map_dict = json.load(open(config.plate_map_json_file, 'r'))
     assert(isinstance(char_map_dict, dict) and 'char_map_dict is not a dict')
     
     for key in char_map_dict.keys():
@@ -67,23 +63,25 @@ def _int_to_string(value, char_map_dict=None):
 
 def _inference_crnn_ctc():
     input_images = tf.placeholder(dtype=tf.float32, shape=[1, _IMAGE_HEIGHT, _IMAGE_WIDTH, 3])
-    char_map_dict = json.load(open(FLAGS.char_map_json_file, 'r'))
+    char_map_dict = json.load(open(config.plate_map_json_file, 'r'))
     # initialise the net model
 
-    with tf.variable_scope('CRNN_CTC', reuse=False):
-        training = tf.placeholder(tf.bool, name='training')
-        net_out = loccnnmodel.build_network(input_images, len(char_map_dict.keys()) + 1, training)
+    training = tf.placeholder(tf.bool, name='training')
+    net_out = pyramidcnnmodel.build_network(input_images, len(char_map_dict.keys()) + 1, training)
 
     input_sequence_length = tf.placeholder(tf.int32, shape=[1], name='input_sequence_length')
 
     ctc_decoded, ct_log_prob = tf.nn.ctc_beam_search_decoder(net_out, input_sequence_length, merge_repeated=False)
 
     init_op = tf.global_variables_initializer()
-    with open(FLAGS.image_list, 'r') as fd:
+    with open(image_list, 'r') as fd:
        image_names = [line.strip() for line in fd.readlines()]
-
+    if config.stn:
+        model_save_path = default.model_stn_save_path
+    else:
+        model_save_path = default.model_save_path
     # set checkpoint saver
-    save_path = tf.train.latest_checkpoint(FLAGS.model_dir)
+    save_path = tf.train.latest_checkpoint(model_save_path)
     variables_to_restore = tf.contrib.framework.get_variables_to_restore(exclude=['CRNN_CTC/locnet'])
     init_fn = tf.contrib.framework.assign_from_checkpoint_fn(save_path, variables_to_restore)
     with tf.Session() as sess:
@@ -96,7 +94,7 @@ def _inference_crnn_ctc():
             print("can not find model weight")
 
         for image_name in image_names:
-            image_path = os.path.join(FLAGS.image_dir, image_name)
+            image_path = os.path.join(image_dir, image_name)
             image = cv2.imread(image_path)
             image = cv2.resize(image, (_IMAGE_WIDTH, _IMAGE_HEIGHT))
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

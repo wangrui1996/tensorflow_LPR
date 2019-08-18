@@ -5,7 +5,7 @@ data/*
 tfrecords/*
 
 *.pyc
-
+jobs/*
 *.jpg
 
 t
