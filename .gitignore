@@ -11,3 +11,5 @@ jobs/*
 t
 *.log
 test_data/*
+
+plate_map.json
