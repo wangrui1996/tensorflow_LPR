@@ -82,10 +82,8 @@ def write_to_files(dataset_path, image_save_path, image_list_path, dataset_name,
                 img_label = "{}{}".format(find_key_by_value(province_label_map, img_label_list[0]), img_label[1:])
                 img_txt_file.writelines("{} {}\n".format(os.path.join(dataset_name, os.path.basename(save_img_path)), img_label.lower()))
 
-                def progress_transform(image_save_path_, img_path_, pts1):
-
                 crop_size = 8
-                for idx in range(provinces_num[find_key_by_value(province_label_map, img_label_list[0])]):
+                for idx in range(provinces_num[find_key_by_value(province_label_map, img_label_list[0])] - 1):
                     img_save_base_name = "{}{}".format(idx, os.path.basename(save_img_path))
                     pts1 = np.float32([[x00 + random.randint(-crop_size, crop_size), y00 + random.randint(-crop_size, crop_size)],
                                        [x01 + random.randint(-crop_size, crop_size), y01 + random.randint(-crop_size, crop_size)],
